@@ -43,7 +43,9 @@ class WanasSwitch(CoordinatorEntity[WanasCoordinator], SwitchEntity):
         self._description = description
         self._attr_unique_id = f"{entry.entry_id}_{description.key}"
         self._attr_translation_key = description.key
-        self._attr_name = description.name
+        self._attr_name = coordinator.registers.get(
+            f"{description.key}_name", description.name
+        )
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Wanas Rekuperator",

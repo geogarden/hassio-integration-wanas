@@ -78,10 +78,13 @@ class WanasCoordinator(DataUpdateCoordinator[dict[int, int]]):
         # Build effective register map: defaults overridden by user options
         defaults = get_default_registers()
         overrides = entry.options.get(CONF_REGISTERS, {})
-        self.registers: dict[str, int] = {**defaults, **overrides}
+        self.registers: dict[str, int | str] = {**defaults, **overrides}
 
-        # Pre-compute read blocks from all unique addresses
-        all_addresses = list(self.registers.values())
+        # Pre-compute read blocks from address keys only (skip *_name keys)
+        all_addresses = [
+            v for k, v in self.registers.items()
+            if k.endswith("_address") and isinstance(v, int)
+        ]
         self._read_blocks = _build_read_blocks(all_addresses)
 
     def _create_client(self) -> AsyncModbusTcpClient | AsyncModbusUdpClient:

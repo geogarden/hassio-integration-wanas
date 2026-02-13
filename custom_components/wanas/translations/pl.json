@@ -1,0 +1,98 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Wanas Rekuperator",
+        "description": "Skonfiguruj połączenie z rekuperatorem Wanas przez Modbus.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "slave_id": "Slave ID",
+          "protocol": "Protokół",
+          "show_advanced": "Pokaż zaawansowaną konfigurację"
+        }
+      },
+      "registers": {
+        "title": "Konfiguracja rejestrów",
+        "description": "Dostosuj nazwy encji i adresy rejestrów Modbus.",
+        "sections": {
+          "sensors": {
+            "name": "Sensory",
+            "data": {
+              "supply_airflow_name": "Wydatek nawiewu (nazwa)",
+              "supply_airflow_address": "Wydatek nawiewu (adres)",
+              "exhaust_airflow_name": "Wydatek wywiewu (nazwa)",
+              "exhaust_airflow_address": "Wydatek wywiewu (adres)",
+              "supply_fan_speed_name": "Bieg nawiewu (nazwa)",
+              "supply_fan_speed_address": "Bieg nawiewu (adres)",
+              "exhaust_fan_speed_name": "Bieg wywiewu (nazwa)",
+              "exhaust_fan_speed_address": "Bieg wywiewu (adres)",
+              "outdoor_temperature_name": "Temperatura zewnętrzna (nazwa)",
+              "outdoor_temperature_address": "Temperatura zewnętrzna (adres)",
+              "exhaust_temperature_name": "Temperatura wyrzutowa (nazwa)",
+              "exhaust_temperature_address": "Temperatura wyrzutowa (adres)",
+              "supply_temperature_name": "Temperatura nawiewu (nazwa)",
+              "supply_temperature_address": "Temperatura nawiewu (adres)",
+              "indoor_temperature_name": "Temperatura wewnątrz (nazwa)",
+              "indoor_temperature_address": "Temperatura wewnątrz (adres)",
+              "current_temperature_name": "Aktualna temperatura (nazwa)",
+              "current_temperature_address": "Aktualna temperatura (adres)",
+              "bypass_state_name": "Stan bypass (nazwa)",
+              "bypass_state_address": "Stan bypass (adres)",
+              "humidifier_state_name": "Stan nawilżacza (nazwa)",
+              "humidifier_state_address": "Stan nawilżacza (adres)",
+              "heater_state_name": "Stan nagrzewnicy (nazwa)",
+              "heater_state_address": "Stan nagrzewnicy (adres)",
+              "cooler_state_name": "Stan chłodnicy (nazwa)",
+              "cooler_state_address": "Stan chłodnicy (adres)",
+              "vacation_mode_name": "Tryb urlopowy (nazwa)",
+              "vacation_mode_address": "Tryb urlopowy (adres)",
+              "filter_replacement_name": "Wymiana filtra (nazwa)",
+              "filter_replacement_address": "Wymiana filtra (adres)",
+              "party_time_name": "Impreza - czas (nazwa)",
+              "party_time_address": "Impreza - czas (adres)",
+              "fan_speed_1_name": "Bieg I (nazwa)",
+              "fan_speed_1_address": "Bieg I (adres)",
+              "fan_speed_3_name": "Bieg III (nazwa)",
+              "fan_speed_3_address": "Bieg III (adres)",
+              "hood_state_name": "Okap - stan (nazwa)",
+              "hood_state_address": "Okap - stan (adres)"
+            }
+          },
+          "switches": {
+            "name": "Przełączniki",
+            "data": {
+              "bypass_name": "Bypass (nazwa)",
+              "bypass_write_address": "Bypass (adres zapisu)",
+              "bypass_verify_address": "Bypass (adres weryfikacji)",
+              "humidifier_name": "Nawilżacz (nazwa)",
+              "humidifier_write_address": "Nawilżacz (adres zapisu)",
+              "humidifier_verify_address": "Nawilżacz (adres weryfikacji)",
+              "heater_name": "Nagrzewnica (nazwa)",
+              "heater_write_address": "Nagrzewnica (adres zapisu)",
+              "heater_verify_address": "Nagrzewnica (adres weryfikacji)",
+              "cooler_name": "Chłodnica (nazwa)",
+              "cooler_write_address": "Chłodnica (adres zapisu)",
+              "cooler_verify_address": "Chłodnica (adres weryfikacji)",
+              "vacation_name": "Urlop (nazwa)",
+              "vacation_write_address": "Urlop (adres zapisu)",
+              "vacation_verify_address": "Urlop (adres weryfikacji)",
+              "fireplace_name": "Kominek (nazwa)",
+              "fireplace_write_address": "Kominek (adres zapisu)",
+              "fireplace_verify_address": "Kominek (adres weryfikacji)",
+              "party_name": "Impreza (nazwa)",
+              "party_write_address": "Impreza (adres zapisu)",
+              "party_verify_address": "Impreza (adres weryfikacji)"
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Nie można połączyć się z urządzeniem. Sprawdź host, port i slave ID."
+    },
+    "abort": {
+      "already_configured": "To urządzenie jest już skonfigurowane."
+    }
+  }
+}
