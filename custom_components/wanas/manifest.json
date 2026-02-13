@@ -1,9 +1,9 @@
 {
   "domain": "wanas",
   "name": "Wanas",
-  "codeowners": ["@ji-engineering"],
+  "codeowners": ["@jrx-code"],
   "config_flow": true,
-  "documentation": "https://github.com/ji-engineering/hassio-integration-wanas",
+  "documentation": "https://github.com/jrx-code/hassio-integration-wanas",
   "iot_class": "local_polling",
   "requirements": ["pymodbus>=3.5.0"],
   "version": "1.0.0"
