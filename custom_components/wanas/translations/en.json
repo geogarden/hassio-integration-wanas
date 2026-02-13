@@ -1,0 +1,61 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Wanas Rekuperator",
+        "description": "Configure connection to Wanas recuperator via Modbus.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "slave_id": "Slave ID",
+          "protocol": "Protocol"
+        }
+      },
+      "registers": {
+        "title": "Register Addresses",
+        "description": "Advanced: customize Modbus register addresses. Default values should work for most installations.",
+        "data": {
+          "supply_airflow_address": "Supply Airflow (address)",
+          "exhaust_airflow_address": "Exhaust Airflow (address)",
+          "supply_fan_speed_address": "Supply Fan Speed (address)",
+          "exhaust_fan_speed_address": "Exhaust Fan Speed (address)",
+          "outdoor_temperature_address": "Outdoor Temperature (address)",
+          "exhaust_temperature_address": "Exhaust Temperature (address)",
+          "supply_temperature_address": "Supply Temperature (address)",
+          "indoor_temperature_address": "Indoor Temperature (address)",
+          "current_temperature_address": "Current Temperature (address)",
+          "bypass_state_address": "Bypass State (address)",
+          "humidifier_state_address": "Humidifier State (address)",
+          "heater_state_address": "Heater State (address)",
+          "cooler_state_address": "Cooler State (address)",
+          "vacation_mode_address": "Vacation Mode (address)",
+          "filter_replacement_address": "Filter Replacement (address)",
+          "party_time_address": "Party Time (address)",
+          "fan_speed_1_address": "Fan Speed 1 (address)",
+          "fan_speed_3_address": "Fan Speed 3 (address)",
+          "hood_state_address": "Hood State (address)",
+          "bypass_write_address": "Bypass (write address)",
+          "bypass_verify_address": "Bypass (verify address)",
+          "humidifier_write_address": "Humidifier (write address)",
+          "humidifier_verify_address": "Humidifier (verify address)",
+          "heater_write_address": "Heater (write address)",
+          "heater_verify_address": "Heater (verify address)",
+          "cooler_write_address": "Cooler (write address)",
+          "cooler_verify_address": "Cooler (verify address)",
+          "vacation_write_address": "Vacation (write address)",
+          "vacation_verify_address": "Vacation (verify address)",
+          "fireplace_write_address": "Fireplace (write address)",
+          "fireplace_verify_address": "Fireplace (verify address)",
+          "party_write_address": "Party (write address)",
+          "party_verify_address": "Party (verify address)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to the device. Check the host, port, and slave ID."
+    },
+    "abort": {
+      "already_configured": "This device is already configured."
+    }
+  }
+}
