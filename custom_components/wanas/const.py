@@ -251,6 +251,14 @@ SENSOR_DESCRIPTIONS: tuple[WanasSensorDescription, ...] = (
         device_class=SensorDeviceClass.HUMIDITY,
         state_class=SensorStateClass.MEASUREMENT,
     ),
+    WanasSensorDescription(
+        key="antifrost_mode",
+        name="WANAS Antyzamarzanie",
+        address=63,
+        data_type=RegisterDataType.UINT16,
+        # Jeśli to ma być widoczne jako status (0/1), nie dodajemy skali.
+        # Jeśli Wanas podaje tam stopień otwarcia przepustnicy w %, możesz dodać scale=0.1
+    ),
 )
 
 
