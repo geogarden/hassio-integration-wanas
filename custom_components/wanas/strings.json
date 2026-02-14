@@ -68,7 +68,9 @@
               "bathroom_1_humidity_name": "Wilgotność łazienka 1 (name)",
               "bathroom_1_humidity_address": "Wilgotność łazienka 1 (address)",
               "bathroom_2_humidity_name": "Wilgotność łazienka 2 (name)",
-              "bathroom_2_humidity_address": "Wilgotność łazienka 2 (address)"
+              "bathroom_2_humidity_address": "Wilgotność łazienka 2 (address)",
+              "antifrost_mode_name": "Antyzamarzanie (nazwa)",
+              "antifrost_mode_address": "Antyzamarzanie (adres)"
             }
           },
           "switches": {
