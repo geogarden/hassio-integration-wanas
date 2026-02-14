@@ -196,7 +196,63 @@ SENSOR_DESCRIPTIONS: tuple[WanasSensorDescription, ...] = (
         address=48,
         data_type=RegisterDataType.INT16,
     ),
+    # --- NOWE SENSORY ---
+    WanasSensorDescription(
+        key="room_temperature",
+        name="Temp pokoj",
+        address=65,
+        scale=0.1,
+        unit=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    WanasSensorDescription(
+        key="bathroom_1_temperature",
+        name="Temp łazienka 1",
+        address=66,
+        scale=0.1,
+        unit=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    WanasSensorDescription(
+        key="bathroom_2_temperature",
+        name="Temp łazienka 2",
+        address=67,
+        scale=0.1,
+        unit=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    WanasSensorDescription(
+        key="room_humidity",
+        name="WANAS Wilgotność pokój",
+        address=55,
+        scale=0.1,
+        unit="%", # Możesz użyć UnitOfPercentage.PERCENTAGE jeśli jest zaimportowany
+        device_class=SensorDeviceClass.HUMIDITY,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    WanasSensorDescription(
+        key="bathroom_1_humidity",
+        name="WANAS Wilgotność łazienka 1",
+        address=56,
+        scale=0.1,
+        unit="%",
+        device_class=SensorDeviceClass.HUMIDITY,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    WanasSensorDescription(
+        key="bathroom_2_humidity",
+        name="WANAS Wilgotność łazienka 2",
+        address=57,
+        scale=0.1,
+        unit="%",
+        device_class=SensorDeviceClass.HUMIDITY,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
 )
+
 
 SWITCH_DESCRIPTIONS: tuple[WanasSwitchDescription, ...] = (
     WanasSwitchDescription(
