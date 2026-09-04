@@ -15,6 +15,11 @@ DEFAULT_PORT = 502
 DEFAULT_SLAVE_ID = 1
 DEFAULT_SCAN_INTERVAL = 30
 
+# Longest run of registers read in one request. RS485-to-Ethernet gateways stop
+# answering beyond a certain block size, and one unanswered read makes the whole
+# coordinator update fail, so keep requests short.
+MAX_READ_BLOCK = 16
+
 CONF_SLAVE_ID = "slave_id"
 CONF_PROTOCOL = "protocol"
 CONF_REGISTERS = "registers"
@@ -208,6 +213,29 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[WanasBinarySensorDescription, ...] = (
         name="Vacation Mode",
         address=35,
     ),
+    # Registers 46-49 are read-only digital inputs on the controller. They report
+    # the state of the external contacts wired to the unit, they are not setpoints.
+    WanasBinarySensorDescription(
+        key="input_speed_1",
+        name="Speed 1 Input",
+        address=46,
+    ),
+    WanasBinarySensorDescription(
+        key="input_speed_3",
+        name="Speed 3 Input",
+        address=47,
+    ),
+    WanasBinarySensorDescription(
+        key="input_hood",
+        name="Hood Input",
+        address=48,
+    ),
+    WanasBinarySensorDescription(
+        key="input_fire_alarm",
+        name="Fire Alarm Input",
+        address=49,
+        device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
 )
 
 SWITCH_DESCRIPTIONS: tuple[WanasSwitchDescription, ...] = (
@@ -235,28 +263,45 @@ SWITCH_DESCRIPTIONS: tuple[WanasSwitchDescription, ...] = (
         write_address=41,
         verify_address=33,
     ),
+    # Registers 41 and 42 are day counters (0-60) rather than booleans, but writing
+    # 1 arms them for a day, which is how the unit has always been driven here. The
+    # matching WanasNumber entities expose the full day range.
     WanasSwitchDescription(
         key="cooler",
         name="Cooler",
         write_address=42,
         verify_address=34,
     ),
-    WanasSwitchDescription(
-        key="hood",
-        name="Hood",
-        write_address=48,
-        verify_address=48,
-    ),
 )
 
 NUMBER_DESCRIPTIONS: tuple[WanasNumberDescription, ...] = (
     WanasNumberDescription(
+        key="heater_days",
+        name="Heater Days",
+        write_address=41,
+        verify_address=41,
+        min_value=0,
+        max_value=60,
+        step=1,
+        unit=UnitOfTime.DAYS,
+    ),
+    WanasNumberDescription(
+        key="cooler_days",
+        name="Cooler Days",
+        write_address=42,
+        verify_address=42,
+        min_value=0,
+        max_value=60,
+        step=1,
+        unit=UnitOfTime.DAYS,
+    ),
+    WanasNumberDescription(
         key="vacation",
         name="Vacation",
         write_address=43,
-        verify_address=35,
+        verify_address=43,
         min_value=0,
-        max_value=255,
+        max_value=30,
         step=1,
         unit=UnitOfTime.DAYS,
     ),
@@ -266,9 +311,9 @@ NUMBER_DESCRIPTIONS: tuple[WanasNumberDescription, ...] = (
         write_address=44,
         verify_address=44,
         min_value=0,
-        max_value=240,
+        max_value=180,
         step=1,
-        unit=UnitOfTime.MINUTES,
+        unit=UnitOfTime.SECONDS,
     ),
     WanasNumberDescription(
         key="party",
@@ -276,26 +321,39 @@ NUMBER_DESCRIPTIONS: tuple[WanasNumberDescription, ...] = (
         write_address=45,
         verify_address=45,
         min_value=0,
-        max_value=240,
+        max_value=720,
         step=1,
         unit=UnitOfTime.MINUTES,
     ),
+    # Registers 52-54 are the actual fan power setpoints. Registers 46-47, which an
+    # earlier revision used here, are read-only digital inputs and are exposed as
+    # binary sensors instead.
     WanasNumberDescription(
-        key="fan_speed_1",
-        name="Fan Speed 1",
-        write_address=46,
-        verify_address=46,
-        min_value=0,
+        key="fan_power_1",
+        name="Fan Power 1",
+        write_address=52,
+        verify_address=52,
+        min_value=1,
         max_value=100,
         step=1,
         unit=PERCENTAGE,
     ),
     WanasNumberDescription(
-        key="fan_speed_3",
-        name="Fan Speed 3",
-        write_address=47,
-        verify_address=47,
-        min_value=0,
+        key="fan_power_2",
+        name="Fan Power 2",
+        write_address=53,
+        verify_address=53,
+        min_value=1,
+        max_value=100,
+        step=1,
+        unit=PERCENTAGE,
+    ),
+    WanasNumberDescription(
+        key="fan_power_3",
+        name="Fan Power 3",
+        write_address=54,
+        verify_address=54,
+        min_value=1,
         max_value=100,
         step=1,
         unit=PERCENTAGE,

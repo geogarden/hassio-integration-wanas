@@ -12,6 +12,7 @@ from pymodbus.framer import FramerType
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
@@ -21,6 +22,7 @@ from .const import (
     DEFAULT_PROTOCOL,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    MAX_READ_BLOCK,
     PROTOCOL_TCP,
     PROTOCOL_UDP,
     RegisterDataType,
@@ -30,11 +32,15 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-def _build_read_blocks(addresses: list[int], max_gap: int = 3) -> list[tuple[int, int]]:
+def _build_read_blocks(
+    addresses: list[int], max_gap: int = 3, max_block: int = MAX_READ_BLOCK
+) -> list[tuple[int, int]]:
     """Group sorted addresses into contiguous read blocks.
 
     Returns list of (start_address, count) tuples.
-    Addresses within max_gap of each other are merged into one block.
+    Addresses within max_gap of each other are merged into one block, and no block
+    grows past max_block registers - RS485 gateways in the field stop answering
+    long reads, and a single unanswered read takes down every entity.
     """
     if not addresses:
         return []
@@ -45,7 +51,7 @@ def _build_read_blocks(addresses: list[int], max_gap: int = 3) -> list[tuple[int
     block_end = sorted_addrs[0]
 
     for addr in sorted_addrs[1:]:
-        if addr - block_end <= max_gap:
+        if addr - block_end <= max_gap and addr - block_start + 1 <= max_block:
             block_end = addr
         else:
             blocks.append((block_start, block_end - block_start + 1))
@@ -156,17 +162,21 @@ class WanasCoordinator(DataUpdateCoordinator[dict[int, int]]):
             result = await client.write_register(
                 address=address, value=value, device_id=self.slave_id
             )
-            if result.isError():
-                raise UpdateFailed(
-                    f"Error writing register {address}: {result}"
-                )
-            # Refresh data after write
-            await self.async_request_refresh()
-        except UpdateFailed:
-            raise
         except Exception as err:
             self._client = None
-            raise UpdateFailed(f"Error writing register: {err}") from err
+            raise HomeAssistantError(
+                f"Wanas: writing register {address} failed: {err}"
+            ) from err
+
+        if result.isError():
+            # The device refused the write - a read-only register or a value out of
+            # range. That is a bad request, not a broken connection, so the client
+            # stays open and the user gets told what happened.
+            raise HomeAssistantError(
+                f"Wanas: device rejected the write of {value} to register {address}: {result}"
+            )
+
+        await self.async_request_refresh()
 
     async def async_close(self) -> None:
         """Close the Modbus client connection."""
