@@ -112,5 +112,117 @@
     "abort": {
       "already_configured": "To urządzenie jest już skonfigurowane."
     }
+  },
+  "entity": {
+    "sensor": {
+      "supply_airflow": {
+        "name": "Wydatek nawiewu"
+      },
+      "exhaust_airflow": {
+        "name": "Wydatek wywiewu"
+      },
+      "supply_fan_speed": {
+        "name": "Bieg nawiewu"
+      },
+      "exhaust_fan_speed": {
+        "name": "Bieg wywiewu"
+      },
+      "outdoor_temperature": {
+        "name": "Temperatura zewnętrzna"
+      },
+      "exhaust_temperature": {
+        "name": "Temperatura wyrzutowa"
+      },
+      "supply_temperature": {
+        "name": "Temperatura nawiewu"
+      },
+      "indoor_temperature": {
+        "name": "Temperatura pomieszczenia"
+      },
+      "current_temperature": {
+        "name": "Temperatura dodatkowa"
+      },
+      "filter_replacement": {
+        "name": "Wymiana filtra"
+      },
+      "system_errors": {
+        "name": "Błędy systemu"
+      }
+    },
+    "binary_sensor": {
+      "gwc_state": {
+        "name": "Stan GWC"
+      },
+      "bypass_state": {
+        "name": "Stan bypassu"
+      },
+      "humidifier_state": {
+        "name": "Stan nawilżacza"
+      },
+      "heater_state": {
+        "name": "Stan nagrzewnicy"
+      },
+      "cooler_state": {
+        "name": "Stan chłodnicy"
+      },
+      "vacation_mode": {
+        "name": "Tryb urlopowy"
+      },
+      "input_speed_1": {
+        "name": "Wejście biegu 1"
+      },
+      "input_speed_3": {
+        "name": "Wejście biegu 3"
+      },
+      "input_hood": {
+        "name": "Wejście okapu"
+      },
+      "input_fire_alarm": {
+        "name": "Wejście przeciwpożarowe"
+      }
+    },
+    "switch": {
+      "gwc": {
+        "name": "GWC"
+      },
+      "bypass": {
+        "name": "Bypass"
+      },
+      "humidifier": {
+        "name": "Nawilżacz"
+      },
+      "heater": {
+        "name": "Nagrzewnica"
+      },
+      "cooler": {
+        "name": "Chłodnica"
+      }
+    },
+    "number": {
+      "heater_days": {
+        "name": "Nagrzewnica (dni)"
+      },
+      "cooler_days": {
+        "name": "Chłodnica (dni)"
+      },
+      "vacation": {
+        "name": "Tryb urlopowy (dni)"
+      },
+      "fireplace": {
+        "name": "Funkcja kominek"
+      },
+      "party": {
+        "name": "Funkcja impreza"
+      },
+      "fan_power_1": {
+        "name": "Moc biegu 1"
+      },
+      "fan_power_2": {
+        "name": "Moc biegu 2"
+      },
+      "fan_power_3": {
+        "name": "Moc biegu 3"
+      }
+    }
   }
 }

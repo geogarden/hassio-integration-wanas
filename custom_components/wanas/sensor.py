@@ -41,9 +41,12 @@ class WanasSensor(CoordinatorEntity[WanasCoordinator], SensorEntity):
         self._description = description
         self._attr_unique_id = f"{entry.entry_id}_{description.key}"
         self._attr_translation_key = description.key
-        self._attr_name = coordinator.registers.get(
-            f"{description.key}_name", description.name
-        )
+        # Setting _attr_name at all wins over translation_key in Entity._name_internal,
+        # so only set it when the advanced register options carry a name the user
+        # actually changed. Otherwise the translated name is used.
+        name = coordinator.registers.get(f"{description.key}_name", description.name)
+        if name != description.name:
+            self._attr_name = name
         self._attr_native_unit_of_measurement = description.unit
         self._attr_device_class = description.device_class
         self._attr_state_class = description.state_class

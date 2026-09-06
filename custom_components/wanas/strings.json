@@ -112,5 +112,117 @@
     "abort": {
       "already_configured": "This device is already configured."
     }
+  },
+  "entity": {
+    "sensor": {
+      "supply_airflow": {
+        "name": "Supply airflow"
+      },
+      "exhaust_airflow": {
+        "name": "Exhaust airflow"
+      },
+      "supply_fan_speed": {
+        "name": "Supply fan speed"
+      },
+      "exhaust_fan_speed": {
+        "name": "Exhaust fan speed"
+      },
+      "outdoor_temperature": {
+        "name": "Outdoor temperature"
+      },
+      "exhaust_temperature": {
+        "name": "Exhaust temperature"
+      },
+      "supply_temperature": {
+        "name": "Supply temperature"
+      },
+      "indoor_temperature": {
+        "name": "Room temperature"
+      },
+      "current_temperature": {
+        "name": "Extra probe temperature"
+      },
+      "filter_replacement": {
+        "name": "Filter replacement"
+      },
+      "system_errors": {
+        "name": "System errors"
+      }
+    },
+    "binary_sensor": {
+      "gwc_state": {
+        "name": "Ground heat exchanger"
+      },
+      "bypass_state": {
+        "name": "Bypass"
+      },
+      "humidifier_state": {
+        "name": "Humidifier"
+      },
+      "heater_state": {
+        "name": "Heater"
+      },
+      "cooler_state": {
+        "name": "Cooler"
+      },
+      "vacation_mode": {
+        "name": "Vacation mode"
+      },
+      "input_speed_1": {
+        "name": "Speed 1 input"
+      },
+      "input_speed_3": {
+        "name": "Speed 3 input"
+      },
+      "input_hood": {
+        "name": "Hood input"
+      },
+      "input_fire_alarm": {
+        "name": "Fire alarm input"
+      }
+    },
+    "switch": {
+      "gwc": {
+        "name": "Ground heat exchanger"
+      },
+      "bypass": {
+        "name": "Bypass"
+      },
+      "humidifier": {
+        "name": "Humidifier"
+      },
+      "heater": {
+        "name": "Heater"
+      },
+      "cooler": {
+        "name": "Cooler"
+      }
+    },
+    "number": {
+      "heater_days": {
+        "name": "Heater days"
+      },
+      "cooler_days": {
+        "name": "Cooler days"
+      },
+      "vacation": {
+        "name": "Vacation days"
+      },
+      "fireplace": {
+        "name": "Fireplace"
+      },
+      "party": {
+        "name": "Party"
+      },
+      "fan_power_1": {
+        "name": "Fan power 1"
+      },
+      "fan_power_2": {
+        "name": "Fan power 2"
+      },
+      "fan_power_3": {
+        "name": "Fan power 3"
+      }
+    }
   }
 }
