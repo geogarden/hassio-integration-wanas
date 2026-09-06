@@ -145,9 +145,9 @@ for a day; the matching Heater days / Cooler days numbers give the full 0 to 60 
 
 ## Requirements
 
-- **Home Assistant 2024.6 or newer.** The integration stores its coordinator in
-  `ConfigEntry.runtime_data` and the advanced step uses `data_entry_flow.section`; neither
-  exists in earlier releases.
+- **Home Assistant 2024.7 or newer.** The advanced step uses `data_entry_flow.section`,
+  which is defined in `homeassistant/data_entry_flow.py` from 2024.7.0 and is absent in
+  2024.6.0. The coordinator also lives in `ConfigEntry.runtime_data`, which landed earlier.
 - **pymodbus 3.10 or newer** (installed automatically). Release 3.10.0 renamed the client
   parameter `slave=` to `device_id=`, which is what this code calls.
 - Network access to the recuperator over Modbus TCP or UDP.
