@@ -154,7 +154,12 @@ class WanasOptionsFlow(OptionsFlow):
     ) -> ConfigFlowResult:
         """Show and store the module checkboxes."""
         if user_input is not None:
-            return self.async_create_entry(data=user_input)
+            # async_create_entry replaces options wholesale, so merge - otherwise
+            # saving this form would drop the register overrides written by the
+            # advanced step of the config flow.
+            return self.async_create_entry(
+                data={**self.config_entry.options, **user_input}
+            )
 
         entry = self.config_entry
         current = {name: entry.options.get(name, entry.data.get(name, True)) for name in FEATURES}
