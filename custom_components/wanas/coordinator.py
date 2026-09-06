@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import ctypes
 import logging
 from datetime import timedelta
@@ -18,6 +19,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .const import (
     CONF_PROTOCOL,
     CONF_REGISTERS,
+    CONF_SCAN_INTERVAL,
     CONF_SLAVE_ID,
     DEFAULT_PROTOCOL,
     DEFAULT_SCAN_INTERVAL,
@@ -71,17 +73,22 @@ class WanasCoordinator(DataUpdateCoordinator[dict[int, int]]):
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialize the coordinator."""
+        scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
         super().__init__(
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL),
+            update_interval=timedelta(seconds=scan_interval),
         )
         self.host: str = entry.data[CONF_HOST]
         self.port: int = entry.data[CONF_PORT]
         self.slave_id: int = entry.data[CONF_SLAVE_ID]
         self.protocol: str = entry.data.get(CONF_PROTOCOL, DEFAULT_PROTOCOL)
         self._client: AsyncModbusTcpClient | AsyncModbusUdpClient | None = None
+        # One RS485 bus behind a transparent gateway: every exchange, read or write,
+        # has to be the only one in flight. RTU frames carry no transaction id, so
+        # overlapping requests cannot be told apart on the way back.
+        self._bus = asyncio.Lock()
 
         # Build effective register map: defaults overridden by user options
         defaults = get_default_registers()
@@ -108,6 +115,11 @@ class WanasCoordinator(DataUpdateCoordinator[dict[int, int]]):
         } - skip
         self._read_blocks = _build_read_blocks(sorted(keep))
 
+    @property
+    def read_blocks(self) -> list[tuple[int, int]]:
+        """The (start, count) requests this coordinator issues, for diagnostics."""
+        return list(self._read_blocks)
+
     def has_feature(self, feature: str | None) -> bool:
         """Whether an entity's optional module is present. Untagged entities always are."""
         return feature is None or self.features.get(feature, True)
@@ -127,12 +139,23 @@ class WanasCoordinator(DataUpdateCoordinator[dict[int, int]]):
             host=self.host, port=self.port, framer=FramerType.RTU
         )
 
+    def _drop_client(self) -> None:
+        """Close and forget the client. Dropping it without closing leaks the socket."""
+        client, self._client = self._client, None
+        if client is not None:
+            try:
+                client.close()
+            except Exception:  # noqa: BLE001 - closing must never mask the real error
+                _LOGGER.debug("Ignoring error while closing the Modbus client", exc_info=True)
+
     async def _get_client(self) -> AsyncModbusTcpClient | AsyncModbusUdpClient:
         """Get or create the Modbus client."""
         if self._client is None or not self._client.connected:
+            self._drop_client()
             self._client = self._create_client()
             connected = await self._client.connect()
             if not connected:
+                self._drop_client()
                 raise UpdateFailed(
                     f"Failed to connect to Modbus device at {self.host}:{self.port}"
                 )
@@ -153,39 +176,42 @@ class WanasCoordinator(DataUpdateCoordinator[dict[int, int]]):
 
     async def _async_update_data(self) -> dict[int, int]:
         """Fetch data from Modbus device."""
-        try:
-            client = await self._get_client()
-        except Exception as err:
-            self._client = None
-            raise UpdateFailed(f"Connection error: {err}") from err
+        async with self._bus:
+            try:
+                client = await self._get_client()
+            except UpdateFailed:
+                raise
+            except Exception as err:
+                self._drop_client()
+                raise UpdateFailed(f"Connection error: {err}") from err
 
-        data: dict[int, int] = {}
-
-        try:
-            for start, count in self._read_blocks:
-                regs = await self._read_registers(client, start, count)
-                for i, val in enumerate(regs):
-                    data[start + i] = val
-        except UpdateFailed:
-            raise
-        except Exception as err:
-            self._client = None
-            raise UpdateFailed(f"Error fetching data: {err}") from err
+            data: dict[int, int] = {}
+            try:
+                for start, count in self._read_blocks:
+                    regs = await self._read_registers(client, start, count)
+                    for i, val in enumerate(regs):
+                        data[start + i] = val
+            except UpdateFailed:
+                raise
+            except Exception as err:
+                self._drop_client()
+                raise UpdateFailed(f"Error fetching data: {err}") from err
 
         return data
 
     async def async_write_register(self, address: int, value: int) -> None:
         """Write a value to a holding register."""
-        try:
-            client = await self._get_client()
-            result = await client.write_register(
-                address=address, value=value, device_id=self.slave_id
-            )
-        except Exception as err:
-            self._client = None
-            raise HomeAssistantError(
-                f"Wanas: writing register {address} failed: {err}"
-            ) from err
+        async with self._bus:
+            try:
+                client = await self._get_client()
+                result = await client.write_register(
+                    address=address, value=value, device_id=self.slave_id
+                )
+            except Exception as err:
+                self._drop_client()
+                raise HomeAssistantError(
+                    f"Wanas: writing register {address} failed: {err}"
+                ) from err
 
         if result.isError():
             # The device refused the write - a read-only register or a value out of
@@ -195,13 +221,16 @@ class WanasCoordinator(DataUpdateCoordinator[dict[int, int]]):
                 f"Wanas: device rejected the write of {value} to register {address}: {result}"
             )
 
+        # Show the new value at once instead of waiting out the refresh debounce,
+        # then confirm it against the device on the next poll.
+        if self.data is not None:
+            self.async_set_updated_data({**self.data, address: value})
         await self.async_request_refresh()
 
     async def async_close(self) -> None:
         """Close the Modbus client connection."""
-        if self._client and self._client.connected:
-            self._client.close()
-            self._client = None
+        async with self._bus:
+            self._drop_client()
 
     @staticmethod
     def get_sensor_value(

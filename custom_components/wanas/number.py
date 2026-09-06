@@ -5,12 +5,15 @@ from __future__ import annotations
 from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, NUMBER_DESCRIPTIONS, WanasNumberDescription
+from .const import NUMBER_DESCRIPTIONS, WanasNumberDescription
 from .coordinator import WanasCoordinator
+from .entity import device_info, device_key
+
+# Writes share one RS485 bus, so let Home Assistant serialise service calls.
+PARALLEL_UPDATES = 1
 
 
 async def async_setup_entry(
@@ -42,7 +45,7 @@ class WanasNumber(CoordinatorEntity[WanasCoordinator], NumberEntity):
         """Initialize the number entity."""
         super().__init__(coordinator)
         self._description = description
-        self._attr_unique_id = f"{entry.entry_id}_{description.key}"
+        self._attr_unique_id = f"{device_key(entry)}_{description.key}"
         self._attr_translation_key = description.key
         # Setting _attr_name at all wins over translation_key in Entity._name_internal,
         # so only set it when the advanced register options carry a name the user
@@ -54,11 +57,8 @@ class WanasNumber(CoordinatorEntity[WanasCoordinator], NumberEntity):
         self._attr_native_max_value = description.max_value
         self._attr_native_step = description.step
         self._attr_native_unit_of_measurement = description.unit
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="Wanas Rekuperator",
-            manufacturer="Wanas",
-        )
+        self._attr_entity_category = description.entity_category
+        self._attr_device_info = device_info(entry)
 
     @property
     def _write_address(self) -> int:

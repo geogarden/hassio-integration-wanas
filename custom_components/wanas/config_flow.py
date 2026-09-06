@@ -26,10 +26,14 @@ from .const import (
     CONF_SHOW_ADVANCED,
     CONF_SLAVE_ID,
     DEFAULT_PORT,
+    CONF_SCAN_INTERVAL,
     DEFAULT_PROTOCOL,
+    DEFAULT_SCAN_INTERVAL,
     DEFAULT_SLAVE_ID,
     DOMAIN,
     FEATURES,
+    MAX_SCAN_INTERVAL,
+    MIN_SCAN_INTERVAL,
     NUMBER_DESCRIPTIONS,
     PROTOCOL_OPTIONS,
     PROTOCOL_TCP,
@@ -55,10 +59,16 @@ DATA_SCHEMA = vol.Schema(
 )
 
 
-def _features_schema(current: dict) -> vol.Schema:
-    """Schema for correcting which optional modules the unit has."""
+def _options_schema(current: dict) -> vol.Schema:
+    """Schema for the fitted modules and the polling interval."""
     return vol.Schema(
-        {vol.Required(name, default=current.get(name, True)): bool for name in FEATURES}
+        {
+            **{vol.Required(name, default=current.get(name, True)): bool for name in FEATURES},
+            vol.Required(
+                CONF_SCAN_INTERVAL,
+                default=current.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
+            ): vol.All(int, vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL)),
+        }
     )
 
 
@@ -162,14 +172,19 @@ class WanasOptionsFlow(OptionsFlow):
             )
 
         entry = self.config_entry
-        current = {name: entry.options.get(name, entry.data.get(name, True)) for name in FEATURES}
-        return self.async_show_form(step_id="init", data_schema=_features_schema(current))
+        current: dict[str, Any] = {
+            name: entry.options.get(name, entry.data.get(name, True)) for name in FEATURES
+        }
+        current[CONF_SCAN_INTERVAL] = entry.options.get(
+            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+        )
+        return self.async_show_form(step_id="init", data_schema=_options_schema(current))
 
 
 class WanasConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Wanas."""
 
-    VERSION = 1
+    VERSION = 2
 
     @staticmethod
     @callback
@@ -188,6 +203,13 @@ class WanasConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
+            # Claim the unique id first. Probing before the duplicate check would open
+            # a second Modbus session on a bus that only tolerates one master.
+            await self.async_set_unique_id(
+                f"{user_input[CONF_HOST]}:{user_input[CONF_PORT]}:{user_input[CONF_SLAVE_ID]}"
+            )
+            self._abort_if_unique_id_configured()
+
             error = await _test_connection(
                 user_input[CONF_HOST],
                 user_input[CONF_PORT],
@@ -198,10 +220,6 @@ class WanasConfigFlow(ConfigFlow, domain=DOMAIN):
                 errors["base"] = error
             else:
                 show_advanced = user_input.pop(CONF_SHOW_ADVANCED, False)
-                await self.async_set_unique_id(
-                    f"{user_input[CONF_HOST]}:{user_input[CONF_PORT]}:{user_input[CONF_SLAVE_ID]}"
-                )
-                self._abort_if_unique_id_configured()
 
                 if show_advanced:
                     self._connection_data = user_input

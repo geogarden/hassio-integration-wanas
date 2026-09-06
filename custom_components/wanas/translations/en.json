@@ -109,6 +109,48 @@
               "party_name": "Party (name)",
               "party_write_address": "Party (write address)",
               "party_verify_address": "Party (verify address)",
+              "zone_1_end_name": "Zone 1 end (name)",
+              "zone_1_end_write_address": "Zone 1 end (write address)",
+              "zone_1_end_verify_address": "Zone 1 end (verify address)",
+              "zone_2_end_name": "Zone 2 end (name)",
+              "zone_2_end_write_address": "Zone 2 end (write address)",
+              "zone_2_end_verify_address": "Zone 2 end (verify address)",
+              "zone_3_end_name": "Zone 3 end (name)",
+              "zone_3_end_write_address": "Zone 3 end (write address)",
+              "zone_3_end_verify_address": "Zone 3 end (verify address)",
+              "zone_4_end_name": "Zone 4 end (name)",
+              "zone_4_end_write_address": "Zone 4 end (write address)",
+              "zone_4_end_verify_address": "Zone 4 end (verify address)",
+              "zone_1_speed_name": "Zone 1 fan speed (name)",
+              "zone_1_speed_write_address": "Zone 1 fan speed (write address)",
+              "zone_1_speed_verify_address": "Zone 1 fan speed (verify address)",
+              "zone_2_speed_name": "Zone 2 fan speed (name)",
+              "zone_2_speed_write_address": "Zone 2 fan speed (write address)",
+              "zone_2_speed_verify_address": "Zone 2 fan speed (verify address)",
+              "zone_3_speed_name": "Zone 3 fan speed (name)",
+              "zone_3_speed_write_address": "Zone 3 fan speed (write address)",
+              "zone_3_speed_verify_address": "Zone 3 fan speed (verify address)",
+              "zone_4_speed_name": "Zone 4 fan speed (name)",
+              "zone_4_speed_write_address": "Zone 4 fan speed (write address)",
+              "zone_4_speed_verify_address": "Zone 4 fan speed (verify address)",
+              "zone_5_speed_name": "Zone 5 fan speed (name)",
+              "zone_5_speed_write_address": "Zone 5 fan speed (write address)",
+              "zone_5_speed_verify_address": "Zone 5 fan speed (verify address)",
+              "zone_1_temperature_name": "Zone 1 temperature (name)",
+              "zone_1_temperature_write_address": "Zone 1 temperature (write address)",
+              "zone_1_temperature_verify_address": "Zone 1 temperature (verify address)",
+              "zone_2_temperature_name": "Zone 2 temperature (name)",
+              "zone_2_temperature_write_address": "Zone 2 temperature (write address)",
+              "zone_2_temperature_verify_address": "Zone 2 temperature (verify address)",
+              "zone_3_temperature_name": "Zone 3 temperature (name)",
+              "zone_3_temperature_write_address": "Zone 3 temperature (write address)",
+              "zone_3_temperature_verify_address": "Zone 3 temperature (verify address)",
+              "zone_4_temperature_name": "Zone 4 temperature (name)",
+              "zone_4_temperature_write_address": "Zone 4 temperature (write address)",
+              "zone_4_temperature_verify_address": "Zone 4 temperature (verify address)",
+              "zone_5_temperature_name": "Zone 5 temperature (name)",
+              "zone_5_temperature_write_address": "Zone 5 temperature (write address)",
+              "zone_5_temperature_verify_address": "Zone 5 temperature (verify address)",
               "fan_power_1_name": "Fan power 1 (name)",
               "fan_power_1_write_address": "Fan power 1 (write address)",
               "fan_power_1_verify_address": "Fan power 1 (verify address)",
@@ -231,6 +273,48 @@
       "party": {
         "name": "Party"
       },
+      "zone_1_end": {
+        "name": "Zone 1 end"
+      },
+      "zone_2_end": {
+        "name": "Zone 2 end"
+      },
+      "zone_3_end": {
+        "name": "Zone 3 end"
+      },
+      "zone_4_end": {
+        "name": "Zone 4 end"
+      },
+      "zone_1_speed": {
+        "name": "Zone 1 fan speed"
+      },
+      "zone_2_speed": {
+        "name": "Zone 2 fan speed"
+      },
+      "zone_3_speed": {
+        "name": "Zone 3 fan speed"
+      },
+      "zone_4_speed": {
+        "name": "Zone 4 fan speed"
+      },
+      "zone_5_speed": {
+        "name": "Zone 5 fan speed"
+      },
+      "zone_1_temperature": {
+        "name": "Zone 1 temperature"
+      },
+      "zone_2_temperature": {
+        "name": "Zone 2 temperature"
+      },
+      "zone_3_temperature": {
+        "name": "Zone 3 temperature"
+      },
+      "zone_4_temperature": {
+        "name": "Zone 4 temperature"
+      },
+      "zone_5_temperature": {
+        "name": "Zone 5 temperature"
+      },
       "fan_power_1": {
         "name": "Fan power 1"
       },
@@ -250,7 +334,8 @@
         "data": {
           "has_heater": "Unit has a heater",
           "has_cooler": "Unit has a cooler",
-          "has_humidifier": "Unit has a humidifier"
+          "has_humidifier": "Unit has a humidifier",
+          "scan_interval": "Polling interval (seconds)"
         }
       }
     }

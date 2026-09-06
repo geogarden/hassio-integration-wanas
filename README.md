@@ -24,6 +24,12 @@ Monitor temperatures, airflow, fan speeds, filter status — and toggle bypass, 
 - **Advanced mode** lets you retarget every Modbus register and rename any entity
 - **Short reads**: registers are grouped into blocks of at most 16, because RS485 gateways
   stop answering long requests and one unanswered read takes down every entity
+- **One exchange at a time**: reads and writes share an `asyncio.Lock`, because RTU frames
+  carry no transaction id and this gateway is transparent
+- **Weekly program** exposed as configuration entities: zone boundaries, zone fan speeds and
+  zone temperatures
+- **Diagnostics** with the whole register bank, the read plan and the entity map, host redacted
+- **Configurable polling interval** (5 to 600 s)
 - **Auto-reconnect** on a dropped connection, and writes rejected by the device surface as a
   Home Assistant error naming the register and the value
 
@@ -151,6 +157,29 @@ for a day; the matching Heater days / Cooler days numbers give the full 0 to 60 
 - **pymodbus 3.10 or newer** (installed automatically). Release 3.10.0 renamed the client
   parameter `slave=` to `device_id=`, which is what this code calls.
 - Network access to the recuperator over Modbus TCP or UDP.
+
+## No fan or climate entity, and why
+
+There is no register that sets the fan speed. Registers 2 and 3 report it, registers 46 and 47
+are read-only digital inputs, and the speed itself comes either from those contacts or from
+the weekly program. A `fan` entity could only fake it by rewriting the active zone's speed,
+which would silently edit the schedule instead of making a temporary change. The weekly
+program is exposed as configuration entities instead, and on this installation the contacts
+are driven by a Zigbee relay outside the integration.
+
+The same applies to `climate`: the unit has no target-temperature register for the supply
+air, only per-zone setpoints in the weekly program.
+
+## Tests
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install pytest-homeassistant-custom-component pymodbus
+.venv/bin/python -m pytest
+```
+
+20 tests covering the config and options flows, setup, the version 2 migration, module
+gating, read blocking, bus serialisation, error mapping and diagnostics. Coverage is 93 %
+overall and 94 % on `config_flow.py`.
 
 ## Languages
 

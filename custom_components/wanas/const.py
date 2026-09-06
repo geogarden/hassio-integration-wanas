@@ -7,19 +7,28 @@ from enum import IntEnum
 
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
-from homeassistant.const import PERCENTAGE, UnitOfTemperature, UnitOfTime, UnitOfVolumeFlowRate
+from homeassistant.const import (
+    PERCENTAGE,
+    EntityCategory,
+    UnitOfTemperature,
+    UnitOfTime,
+    UnitOfVolumeFlowRate,
+)
 
 DOMAIN = "wanas"
 
 DEFAULT_PORT = 502
 DEFAULT_SLAVE_ID = 1
 DEFAULT_SCAN_INTERVAL = 30
+MIN_SCAN_INTERVAL = 5
+MAX_SCAN_INTERVAL = 600
 
 # Longest run of registers read in one request. RS485-to-Ethernet gateways stop
 # answering beyond a certain block size, and one unanswered read makes the whole
 # coordinator update fail, so keep requests short.
 MAX_READ_BLOCK = 16
 
+CONF_SCAN_INTERVAL = "scan_interval"
 CONF_SLAVE_ID = "slave_id"
 CONF_HAS_HEATER = "has_heater"
 CONF_HAS_COOLER = "has_cooler"
@@ -66,6 +75,7 @@ class WanasSensorDescription:
     unit: str | None = None
     device_class: SensorDeviceClass | None = None
     state_class: SensorStateClass | None = None
+    entity_category: EntityCategory | None = None
 
 
 @dataclass(frozen=True)
@@ -77,6 +87,7 @@ class WanasBinarySensorDescription:
     address: int
     device_class: BinarySensorDeviceClass | None = None
     feature: str | None = None
+    entity_category: EntityCategory | None = None
 
 
 @dataclass(frozen=True)
@@ -90,6 +101,7 @@ class WanasSwitchDescription:
     on_value: int = 1
     off_value: int = 0
     feature: str | None = None
+    entity_category: EntityCategory | None = None
 
 
 @dataclass(frozen=True)
@@ -105,6 +117,7 @@ class WanasNumberDescription:
     step: float = 1
     unit: str | None = None
     feature: str | None = None
+    entity_category: EntityCategory | None = None
 
 
 SENSOR_DESCRIPTIONS: tuple[WanasSensorDescription, ...] = (
@@ -192,6 +205,7 @@ SENSOR_DESCRIPTIONS: tuple[WanasSensorDescription, ...] = (
         key="system_errors",
         name="System Errors",
         address=37,
+        entity_category=EntityCategory.DIAGNOSTIC,
     ),
 )
 
@@ -233,16 +247,19 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[WanasBinarySensorDescription, ...] = (
     # the state of the external contacts wired to the unit, they are not setpoints.
     WanasBinarySensorDescription(
         key="input_speed_1",
+        entity_category=EntityCategory.DIAGNOSTIC,
         name="Speed 1 Input",
         address=46,
     ),
     WanasBinarySensorDescription(
         key="input_speed_3",
+        entity_category=EntityCategory.DIAGNOSTIC,
         name="Speed 3 Input",
         address=47,
     ),
     WanasBinarySensorDescription(
         key="input_hood",
+        entity_category=EntityCategory.DIAGNOSTIC,
         name="Hood Input",
         address=48,
     ),
@@ -251,6 +268,7 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[WanasBinarySensorDescription, ...] = (
         name="Fire Alarm Input",
         address=49,
         device_class=BinarySensorDeviceClass.PROBLEM,
+        entity_category=EntityCategory.DIAGNOSTIC,
     ),
 )
 
@@ -349,6 +367,155 @@ NUMBER_DESCRIPTIONS: tuple[WanasNumberDescription, ...] = (
     # Registers 52-54 are the actual fan power setpoints. Registers 46-47, which an
     # earlier revision used here, are read-only digital inputs and are exposed as
     # binary sensors instead.
+    WanasNumberDescription(
+        key="zone_1_end",
+        name="Zone 1 End",
+        write_address=10,
+        verify_address=10,
+        min_value=15,
+        max_value=1380,
+        step=15,
+        unit=UnitOfTime.MINUTES,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    WanasNumberDescription(
+        key="zone_2_end",
+        name="Zone 2 End",
+        write_address=11,
+        verify_address=11,
+        min_value=30,
+        max_value=1395,
+        step=15,
+        unit=UnitOfTime.MINUTES,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    WanasNumberDescription(
+        key="zone_3_end",
+        name="Zone 3 End",
+        write_address=12,
+        verify_address=12,
+        min_value=45,
+        max_value=1410,
+        step=15,
+        unit=UnitOfTime.MINUTES,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    WanasNumberDescription(
+        key="zone_4_end",
+        name="Zone 4 End",
+        write_address=13,
+        verify_address=13,
+        min_value=60,
+        max_value=1425,
+        step=15,
+        unit=UnitOfTime.MINUTES,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    WanasNumberDescription(
+        key="zone_1_speed",
+        name="Zone 1 Fan Speed",
+        write_address=14,
+        verify_address=14,
+        min_value=0,
+        max_value=3,
+        step=1,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    WanasNumberDescription(
+        key="zone_2_speed",
+        name="Zone 2 Fan Speed",
+        write_address=15,
+        verify_address=15,
+        min_value=0,
+        max_value=3,
+        step=1,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    WanasNumberDescription(
+        key="zone_3_speed",
+        name="Zone 3 Fan Speed",
+        write_address=16,
+        verify_address=16,
+        min_value=0,
+        max_value=3,
+        step=1,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    WanasNumberDescription(
+        key="zone_4_speed",
+        name="Zone 4 Fan Speed",
+        write_address=17,
+        verify_address=17,
+        min_value=0,
+        max_value=3,
+        step=1,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    WanasNumberDescription(
+        key="zone_5_speed",
+        name="Zone 5 Fan Speed",
+        write_address=18,
+        verify_address=18,
+        min_value=0,
+        max_value=3,
+        step=1,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    WanasNumberDescription(
+        key="zone_1_temperature",
+        name="Zone 1 Temperature",
+        write_address=19,
+        verify_address=19,
+        min_value=10,
+        max_value=30,
+        step=1,
+        unit=UnitOfTemperature.CELSIUS,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    WanasNumberDescription(
+        key="zone_2_temperature",
+        name="Zone 2 Temperature",
+        write_address=20,
+        verify_address=20,
+        min_value=10,
+        max_value=30,
+        step=1,
+        unit=UnitOfTemperature.CELSIUS,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    WanasNumberDescription(
+        key="zone_3_temperature",
+        name="Zone 3 Temperature",
+        write_address=21,
+        verify_address=21,
+        min_value=10,
+        max_value=30,
+        step=1,
+        unit=UnitOfTemperature.CELSIUS,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    WanasNumberDescription(
+        key="zone_4_temperature",
+        name="Zone 4 Temperature",
+        write_address=22,
+        verify_address=22,
+        min_value=10,
+        max_value=30,
+        step=1,
+        unit=UnitOfTemperature.CELSIUS,
+        entity_category=EntityCategory.CONFIG,
+    ),
+    WanasNumberDescription(
+        key="zone_5_temperature",
+        name="Zone 5 Temperature",
+        write_address=23,
+        verify_address=23,
+        min_value=10,
+        max_value=30,
+        step=1,
+        unit=UnitOfTemperature.CELSIUS,
+        entity_category=EntityCategory.CONFIG,
+    ),
     WanasNumberDescription(
         key="fan_power_1",
         name="Fan Power 1",

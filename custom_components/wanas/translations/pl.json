@@ -109,6 +109,48 @@
               "party_name": "Funkcja impreza (nazwa)",
               "party_write_address": "Funkcja impreza (adres zapisu)",
               "party_verify_address": "Funkcja impreza (adres weryfikacji)",
+              "zone_1_end_name": "Koniec strefy 1 (nazwa)",
+              "zone_1_end_write_address": "Koniec strefy 1 (adres zapisu)",
+              "zone_1_end_verify_address": "Koniec strefy 1 (adres weryfikacji)",
+              "zone_2_end_name": "Koniec strefy 2 (nazwa)",
+              "zone_2_end_write_address": "Koniec strefy 2 (adres zapisu)",
+              "zone_2_end_verify_address": "Koniec strefy 2 (adres weryfikacji)",
+              "zone_3_end_name": "Koniec strefy 3 (nazwa)",
+              "zone_3_end_write_address": "Koniec strefy 3 (adres zapisu)",
+              "zone_3_end_verify_address": "Koniec strefy 3 (adres weryfikacji)",
+              "zone_4_end_name": "Koniec strefy 4 (nazwa)",
+              "zone_4_end_write_address": "Koniec strefy 4 (adres zapisu)",
+              "zone_4_end_verify_address": "Koniec strefy 4 (adres weryfikacji)",
+              "zone_1_speed_name": "Bieg strefy 1 (nazwa)",
+              "zone_1_speed_write_address": "Bieg strefy 1 (adres zapisu)",
+              "zone_1_speed_verify_address": "Bieg strefy 1 (adres weryfikacji)",
+              "zone_2_speed_name": "Bieg strefy 2 (nazwa)",
+              "zone_2_speed_write_address": "Bieg strefy 2 (adres zapisu)",
+              "zone_2_speed_verify_address": "Bieg strefy 2 (adres weryfikacji)",
+              "zone_3_speed_name": "Bieg strefy 3 (nazwa)",
+              "zone_3_speed_write_address": "Bieg strefy 3 (adres zapisu)",
+              "zone_3_speed_verify_address": "Bieg strefy 3 (adres weryfikacji)",
+              "zone_4_speed_name": "Bieg strefy 4 (nazwa)",
+              "zone_4_speed_write_address": "Bieg strefy 4 (adres zapisu)",
+              "zone_4_speed_verify_address": "Bieg strefy 4 (adres weryfikacji)",
+              "zone_5_speed_name": "Bieg strefy 5 (nazwa)",
+              "zone_5_speed_write_address": "Bieg strefy 5 (adres zapisu)",
+              "zone_5_speed_verify_address": "Bieg strefy 5 (adres weryfikacji)",
+              "zone_1_temperature_name": "Temperatura strefy 1 (nazwa)",
+              "zone_1_temperature_write_address": "Temperatura strefy 1 (adres zapisu)",
+              "zone_1_temperature_verify_address": "Temperatura strefy 1 (adres weryfikacji)",
+              "zone_2_temperature_name": "Temperatura strefy 2 (nazwa)",
+              "zone_2_temperature_write_address": "Temperatura strefy 2 (adres zapisu)",
+              "zone_2_temperature_verify_address": "Temperatura strefy 2 (adres weryfikacji)",
+              "zone_3_temperature_name": "Temperatura strefy 3 (nazwa)",
+              "zone_3_temperature_write_address": "Temperatura strefy 3 (adres zapisu)",
+              "zone_3_temperature_verify_address": "Temperatura strefy 3 (adres weryfikacji)",
+              "zone_4_temperature_name": "Temperatura strefy 4 (nazwa)",
+              "zone_4_temperature_write_address": "Temperatura strefy 4 (adres zapisu)",
+              "zone_4_temperature_verify_address": "Temperatura strefy 4 (adres weryfikacji)",
+              "zone_5_temperature_name": "Temperatura strefy 5 (nazwa)",
+              "zone_5_temperature_write_address": "Temperatura strefy 5 (adres zapisu)",
+              "zone_5_temperature_verify_address": "Temperatura strefy 5 (adres weryfikacji)",
               "fan_power_1_name": "Moc biegu 1 (nazwa)",
               "fan_power_1_write_address": "Moc biegu 1 (adres zapisu)",
               "fan_power_1_verify_address": "Moc biegu 1 (adres weryfikacji)",
@@ -231,6 +273,48 @@
       "party": {
         "name": "Funkcja impreza"
       },
+      "zone_1_end": {
+        "name": "Koniec strefy 1"
+      },
+      "zone_2_end": {
+        "name": "Koniec strefy 2"
+      },
+      "zone_3_end": {
+        "name": "Koniec strefy 3"
+      },
+      "zone_4_end": {
+        "name": "Koniec strefy 4"
+      },
+      "zone_1_speed": {
+        "name": "Bieg strefy 1"
+      },
+      "zone_2_speed": {
+        "name": "Bieg strefy 2"
+      },
+      "zone_3_speed": {
+        "name": "Bieg strefy 3"
+      },
+      "zone_4_speed": {
+        "name": "Bieg strefy 4"
+      },
+      "zone_5_speed": {
+        "name": "Bieg strefy 5"
+      },
+      "zone_1_temperature": {
+        "name": "Temperatura strefy 1"
+      },
+      "zone_2_temperature": {
+        "name": "Temperatura strefy 2"
+      },
+      "zone_3_temperature": {
+        "name": "Temperatura strefy 3"
+      },
+      "zone_4_temperature": {
+        "name": "Temperatura strefy 4"
+      },
+      "zone_5_temperature": {
+        "name": "Temperatura strefy 5"
+      },
       "fan_power_1": {
         "name": "Moc biegu 1"
       },
@@ -250,7 +334,8 @@
         "data": {
           "has_heater": "Rekuperator ma nagrzewnicę",
           "has_cooler": "Rekuperator ma chłodnicę",
-          "has_humidifier": "Rekuperator ma nawilżacz"
+          "has_humidifier": "Rekuperator ma nawilżacz",
+          "scan_interval": "Częstotliwość odpytywania (sekundy)"
         }
       }
     }

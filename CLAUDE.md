@@ -49,6 +49,14 @@ renamed it in the advanced register step. `Entity._name_internal` returns `_attr
 if the attribute exists at all, so assigning it unconditionally silently kills every
 translation. Names live in `strings.json` and `translations/*.json` under `entity.<platform>.<key>.name`.
 
+### Entity identity
+
+Entity and device unique ids are `f"{entry.unique_id}_{key}"`, where `entry.unique_id` is
+`host:port:slave_id`. Never go back to `entry_id`: it changes when the integration is removed
+and re-added, orphaning every entity with its history. `async_migrate_entry` moves version 1
+entries across; anything that builds those ids (the module purge in `__init__.py`, for one)
+must use `device_key(entry)` from `entity.py`.
+
 ### Testing
 
 Develop against the mock in `~/CodeHub/services/modbus-server` (LXC 419, RTU-over-TCP on
@@ -56,6 +64,9 @@ Develop against the mock in `~/CodeHub/services/modbus-server` (LXC 419, RTU-ove
 Waveshare gateway runs in transparent mode and broadcasts RS485 responses to every connected
 TCP socket, so a second Modbus master corrupts Home Assistant's readings. Test instance is
 `ha-test.iwanus.eu` (VM 103).
+
+`pytest` runs against `pytest-homeassistant-custom-component` in a venv; the suite mocks the
+pymodbus client, so it needs no hardware and no mock server.
 
 ### Modbus Register Layout
 
