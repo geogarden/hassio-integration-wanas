@@ -23,6 +23,7 @@ async def async_setup_entry(
     async_add_entities(
         WanasBinarySensor(coordinator, entry, desc)
         for desc in BINARY_SENSOR_DESCRIPTIONS
+        if coordinator.has_feature(desc.feature)
     )
 
 

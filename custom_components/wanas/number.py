@@ -21,7 +21,9 @@ async def async_setup_entry(
     """Set up Wanas number entities."""
     coordinator: WanasCoordinator = entry.runtime_data
     async_add_entities(
-        WanasNumber(coordinator, entry, desc) for desc in NUMBER_DESCRIPTIONS
+        WanasNumber(coordinator, entry, desc)
+        for desc in NUMBER_DESCRIPTIONS
+        if coordinator.has_feature(desc.feature)
     )
 
 

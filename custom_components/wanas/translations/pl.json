@@ -3,13 +3,16 @@
     "step": {
       "user": {
         "title": "Wanas Rekuperator",
-        "description": "Skonfiguruj połączenie z rekuperatorem Wanas przez Modbus.",
+        "description": "Skonfiguruj połączenie z rekuperatorem Wanas przez Modbus. Odznacz moduł, którego rekuperator nie ma, a jego encje nie powstaną.",
         "data": {
           "host": "Host",
           "port": "Port",
           "slave_id": "Slave ID",
           "protocol": "Protokół",
-          "show_advanced": "Pokaż zaawansowaną konfigurację"
+          "show_advanced": "Pokaż zaawansowaną konfigurację",
+          "has_heater": "Rekuperator ma nagrzewnicę",
+          "has_cooler": "Rekuperator ma chłodnicę",
+          "has_humidifier": "Rekuperator ma nawilżacz"
         }
       },
       "registers": {
@@ -222,6 +225,19 @@
       },
       "fan_power_3": {
         "name": "Moc biegu 3"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Zamontowane moduły",
+        "description": "Encje modułu, którego nie ma, nie zostaną utworzone.",
+        "data": {
+          "has_heater": "Rekuperator ma nagrzewnicę",
+          "has_cooler": "Rekuperator ma chłodnicę",
+          "has_humidifier": "Rekuperator ma nawilżacz"
+        }
       }
     }
   }

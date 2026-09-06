@@ -22,10 +22,12 @@ from .const import (
     DEFAULT_PROTOCOL,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    FEATURES,
     MAX_READ_BLOCK,
     PROTOCOL_TCP,
     PROTOCOL_UDP,
     RegisterDataType,
+    feature_addresses,
     get_default_registers,
 )
 
@@ -86,12 +88,29 @@ class WanasCoordinator(DataUpdateCoordinator[dict[int, int]]):
         overrides = entry.options.get(CONF_REGISTERS, {})
         self.registers: dict[str, int | str] = {**defaults, **overrides}
 
-        # Pre-compute read blocks from address keys only (skip *_name keys)
-        all_addresses = [
+        # Optional modules the unit does not have: options win over the original
+        # answers from the config flow, so they can be corrected later.
+        self.features: dict[str, bool] = {
+            name: entry.options.get(name, entry.data.get(name, True))
+            for name in FEATURES
+        }
+
+        # Pre-compute read blocks from address keys only (skip *_name keys).
+        # Registers belonging to a module the unit does not have are dropped, unless
+        # another entity that is still present also reads them.
+        skip: set[int] = set()
+        for name, present in self.features.items():
+            if not present:
+                skip |= feature_addresses(name)
+        keep = {
             v for k, v in self.registers.items()
             if k.endswith("_address") and isinstance(v, int)
-        ]
-        self._read_blocks = _build_read_blocks(all_addresses)
+        } - skip
+        self._read_blocks = _build_read_blocks(sorted(keep))
+
+    def has_feature(self, feature: str | None) -> bool:
+        """Whether an entity's optional module is present. Untagged entities always are."""
+        return feature is None or self.features.get(feature, True)
 
     def _create_client(self) -> AsyncModbusTcpClient | AsyncModbusUdpClient:
         """Create a Modbus client based on protocol selection."""

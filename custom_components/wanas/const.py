@@ -21,9 +21,19 @@ DEFAULT_SCAN_INTERVAL = 30
 MAX_READ_BLOCK = 16
 
 CONF_SLAVE_ID = "slave_id"
+CONF_HAS_HEATER = "has_heater"
+CONF_HAS_COOLER = "has_cooler"
+CONF_HAS_HUMIDIFIER = "has_humidifier"
 CONF_PROTOCOL = "protocol"
 CONF_REGISTERS = "registers"
 CONF_SHOW_ADVANCED = "show_advanced"
+
+# Optional modules. A unit without one of these still answers on the matching
+# registers, so absence cannot be probed - it has to be declared by the user.
+FEATURE_HEATER = CONF_HAS_HEATER
+FEATURE_COOLER = CONF_HAS_COOLER
+FEATURE_HUMIDIFIER = CONF_HAS_HUMIDIFIER
+FEATURES: tuple[str, ...] = (FEATURE_HEATER, FEATURE_COOLER, FEATURE_HUMIDIFIER)
 
 PROTOCOL_RTU_OVER_TCP = "rtu_over_tcp"
 PROTOCOL_TCP = "tcp"
@@ -66,6 +76,7 @@ class WanasBinarySensorDescription:
     name: str
     address: int
     device_class: BinarySensorDeviceClass | None = None
+    feature: str | None = None
 
 
 @dataclass(frozen=True)
@@ -78,6 +89,7 @@ class WanasSwitchDescription:
     verify_address: int
     on_value: int = 1
     off_value: int = 0
+    feature: str | None = None
 
 
 @dataclass(frozen=True)
@@ -92,6 +104,7 @@ class WanasNumberDescription:
     max_value: float = 255
     step: float = 1
     unit: str | None = None
+    feature: str | None = None
 
 
 SENSOR_DESCRIPTIONS: tuple[WanasSensorDescription, ...] = (
@@ -197,16 +210,19 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[WanasBinarySensorDescription, ...] = (
         key="humidifier_state",
         name="Humidifier State",
         address=32,
+        feature=FEATURE_HUMIDIFIER,
     ),
     WanasBinarySensorDescription(
         key="heater_state",
         name="Heater State",
         address=33,
+        feature=FEATURE_HEATER,
     ),
     WanasBinarySensorDescription(
         key="cooler_state",
         name="Cooler State",
         address=34,
+        feature=FEATURE_COOLER,
     ),
     WanasBinarySensorDescription(
         key="vacation_mode",
@@ -256,12 +272,14 @@ SWITCH_DESCRIPTIONS: tuple[WanasSwitchDescription, ...] = (
         name="Humidifier",
         write_address=40,
         verify_address=32,
+        feature=FEATURE_HUMIDIFIER,
     ),
     WanasSwitchDescription(
         key="heater",
         name="Heater",
         write_address=41,
         verify_address=33,
+        feature=FEATURE_HEATER,
     ),
     # Registers 41 and 42 are day counters (0-60) rather than booleans, but writing
     # 1 arms them for a day, which is how the unit has always been driven here. The
@@ -271,6 +289,7 @@ SWITCH_DESCRIPTIONS: tuple[WanasSwitchDescription, ...] = (
         name="Cooler",
         write_address=42,
         verify_address=34,
+        feature=FEATURE_COOLER,
     ),
 )
 
@@ -284,6 +303,7 @@ NUMBER_DESCRIPTIONS: tuple[WanasNumberDescription, ...] = (
         max_value=60,
         step=1,
         unit=UnitOfTime.DAYS,
+        feature=FEATURE_HEATER,
     ),
     WanasNumberDescription(
         key="cooler_days",
@@ -294,6 +314,7 @@ NUMBER_DESCRIPTIONS: tuple[WanasNumberDescription, ...] = (
         max_value=60,
         step=1,
         unit=UnitOfTime.DAYS,
+        feature=FEATURE_COOLER,
     ),
     WanasNumberDescription(
         key="vacation",
@@ -394,3 +415,15 @@ def get_default_register_config() -> dict[str, int | str]:
         regs[f"{desc.key}_write_address"] = desc.write_address
         regs[f"{desc.key}_verify_address"] = desc.verify_address
     return regs
+
+
+def feature_addresses(feature: str) -> set[int]:
+    """Registers that exist only because of one optional module."""
+    addrs: set[int] = set()
+    for desc in BINARY_SENSOR_DESCRIPTIONS:
+        if desc.feature == feature:
+            addrs.add(desc.address)
+    for desc in (*SWITCH_DESCRIPTIONS, *NUMBER_DESCRIPTIONS):
+        if desc.feature == feature:
+            addrs.update((desc.write_address, desc.verify_address))
+    return addrs

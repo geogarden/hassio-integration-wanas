@@ -9,8 +9,14 @@ import voluptuous as vol
 from pymodbus.client import AsyncModbusTcpClient, AsyncModbusUdpClient
 from pymodbus.framer import FramerType
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+)
 from homeassistant.const import CONF_HOST, CONF_PORT
+from homeassistant.core import callback
 from homeassistant.data_entry_flow import section
 
 from .const import (
@@ -23,6 +29,7 @@ from .const import (
     DEFAULT_PROTOCOL,
     DEFAULT_SLAVE_ID,
     DOMAIN,
+    FEATURES,
     NUMBER_DESCRIPTIONS,
     PROTOCOL_OPTIONS,
     PROTOCOL_TCP,
@@ -40,9 +47,19 @@ DATA_SCHEMA = vol.Schema(
         vol.Required(CONF_PORT, default=DEFAULT_PORT): int,
         vol.Required(CONF_SLAVE_ID, default=DEFAULT_SLAVE_ID): int,
         vol.Required(CONF_PROTOCOL, default=DEFAULT_PROTOCOL): vol.In(PROTOCOL_OPTIONS),
+        # The controller answers on the heater, cooler and humidifier registers whether
+        # or not the modules are fitted, so their presence cannot be detected - ask.
+        **{vol.Required(name, default=True): bool for name in FEATURES},
         vol.Optional(CONF_SHOW_ADVANCED, default=False): bool,
     }
 )
+
+
+def _features_schema(current: dict) -> vol.Schema:
+    """Schema for correcting which optional modules the unit has."""
+    return vol.Schema(
+        {vol.Required(name, default=current.get(name, True)): bool for name in FEATURES}
+    )
 
 
 def _create_client(
@@ -129,10 +146,31 @@ def _build_register_schema(defaults: dict[str, int | str]) -> vol.Schema:
     )
 
 
+class WanasOptionsFlow(OptionsFlow):
+    """Let the fitted modules be corrected without removing the integration."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Show and store the module checkboxes."""
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+
+        entry = self.config_entry
+        current = {name: entry.options.get(name, entry.data.get(name, True)) for name in FEATURES}
+        return self.async_show_form(step_id="init", data_schema=_features_schema(current))
+
+
 class WanasConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Wanas."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> WanasOptionsFlow:
+        """Return the options flow."""
+        return WanasOptionsFlow()
 
     def __init__(self) -> None:
         """Initialize the config flow."""

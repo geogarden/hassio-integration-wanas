@@ -18,6 +18,8 @@ Monitor temperatures, airflow, fan speeds, filter status — and toggle bypass, 
   controls for bypass, GWC, humidifier, heater, cooler, the timed functions and the fan
   power setpoints
 - **Polish and English** entity and config-flow names, picked from the Home Assistant language
+- **Asks which optional modules the unit has** (heater, cooler, humidifier) and skips their
+  entities entirely when they are not fitted; changeable afterwards without re-adding
 - **Three protocols**: RTU over TCP (default), plain TCP, UDP
 - **Advanced mode** lets you retarget every Modbus register and rename any entity
 - **Short reads**: registers are grouped into blocks of at most 16, because RS485 gateways
@@ -52,7 +54,20 @@ Monitor temperatures, airflow, fan speeds, filter status — and toggle bypass, 
    | Slave ID | `1` | Modbus device ID |
    | Protocol | `rtu_over_tcp` | `rtu_over_tcp`, `tcp`, or `udp` |
 
-4. The integration will test the connection before saving
+4. Tick only the optional modules the unit actually has. The controller answers on the
+   heater, cooler and humidifier registers whether or not the modules are fitted, so their
+   presence cannot be probed. Clearing one means its entities are never created:
+
+   | Module | Entities skipped |
+   |---|---|
+   | Heater | `binary_sensor` heater state, `switch` heater, `number` heater days |
+   | Cooler | `binary_sensor` cooler state, `switch` cooler, `number` cooler days |
+   | Humidifier | `binary_sensor` humidifier state, `switch` humidifier |
+
+5. The integration will test the connection before saving
+
+Answers can be corrected later under **Configure** on the integration card. Turning a module
+off removes its entities from the registry rather than leaving them unavailable.
 
 ### Advanced: Custom Register Addresses
 

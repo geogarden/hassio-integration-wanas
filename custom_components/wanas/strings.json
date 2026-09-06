@@ -3,13 +3,16 @@
     "step": {
       "user": {
         "title": "Wanas Rekuperator",
-        "description": "Configure connection to Wanas recuperator via Modbus.",
+        "description": "Configure connection to Wanas recuperator via Modbus. Clear a module the unit does not have and its entities will not be created.",
         "data": {
           "host": "Host",
           "port": "Port",
           "slave_id": "Slave ID",
           "protocol": "Protocol",
-          "show_advanced": "Show advanced configuration"
+          "show_advanced": "Show advanced configuration",
+          "has_heater": "Unit has a heater",
+          "has_cooler": "Unit has a cooler",
+          "has_humidifier": "Unit has a humidifier"
         }
       },
       "registers": {
@@ -151,19 +154,19 @@
     },
     "binary_sensor": {
       "gwc_state": {
-        "name": "Ground heat exchanger"
+        "name": "Ground heat exchanger state"
       },
       "bypass_state": {
-        "name": "Bypass"
+        "name": "Bypass state"
       },
       "humidifier_state": {
-        "name": "Humidifier"
+        "name": "Humidifier state"
       },
       "heater_state": {
-        "name": "Heater"
+        "name": "Heater state"
       },
       "cooler_state": {
-        "name": "Cooler"
+        "name": "Cooler state"
       },
       "vacation_mode": {
         "name": "Vacation mode"
@@ -222,6 +225,19 @@
       },
       "fan_power_3": {
         "name": "Fan power 3"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Fitted modules",
+        "description": "Entities for a module that is not fitted are not created.",
+        "data": {
+          "has_heater": "Unit has a heater",
+          "has_cooler": "Unit has a cooler",
+          "has_humidifier": "Unit has a humidifier"
+        }
       }
     }
   }
