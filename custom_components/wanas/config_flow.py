@@ -31,6 +31,7 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SLAVE_ID,
     DOMAIN,
+    FEATURE_DEFAULTS,
     FEATURES,
     MAX_SCAN_INTERVAL,
     MIN_SCAN_INTERVAL,
@@ -51,9 +52,9 @@ DATA_SCHEMA = vol.Schema(
         vol.Required(CONF_PORT, default=DEFAULT_PORT): int,
         vol.Required(CONF_SLAVE_ID, default=DEFAULT_SLAVE_ID): int,
         vol.Required(CONF_PROTOCOL, default=DEFAULT_PROTOCOL): vol.In(PROTOCOL_OPTIONS),
-        # The controller answers on the heater, cooler and humidifier registers whether
-        # or not the modules are fitted, so their presence cannot be detected - ask.
-        **{vol.Required(name, default=True): bool for name in FEATURES},
+        # The controller answers on the optional-module registers whether or not the
+        # modules are fitted, so their presence cannot be detected - ask.
+        **{vol.Required(name, default=FEATURE_DEFAULTS[name]): bool for name in FEATURES},
         vol.Optional(CONF_SHOW_ADVANCED, default=False): bool,
     }
 )
@@ -63,7 +64,8 @@ def _options_schema(current: dict) -> vol.Schema:
     """Schema for the fitted modules and the polling interval."""
     return vol.Schema(
         {
-            **{vol.Required(name, default=current.get(name, True)): bool for name in FEATURES},
+            **{vol.Required(name, default=current.get(name, FEATURE_DEFAULTS[name])): bool
+            for name in FEATURES},
             vol.Required(
                 CONF_SCAN_INTERVAL,
                 default=current.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
@@ -173,7 +175,8 @@ class WanasOptionsFlow(OptionsFlow):
 
         entry = self.config_entry
         current: dict[str, Any] = {
-            name: entry.options.get(name, entry.data.get(name, True)) for name in FEATURES
+            name: entry.options.get(name, entry.data.get(name, FEATURE_DEFAULTS[name]))
+            for name in FEATURES
         }
         current[CONF_SCAN_INTERVAL] = entry.options.get(
             CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL

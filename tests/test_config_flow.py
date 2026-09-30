@@ -14,6 +14,7 @@ from custom_components.wanas.const import (
     CONF_HAS_COOLER,
     CONF_HAS_HEATER,
     CONF_HAS_HUMIDIFIER,
+    CONF_HAS_MAXICONTROL,
     CONF_REGISTERS,
     CONF_SCAN_INTERVAL,
     CONF_SLAVE_ID,
@@ -36,6 +37,8 @@ async def test_user_flow_creates_entry(hass: HomeAssistant, mock_client) -> None
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["result"].unique_id == "192.0.2.10:5503:1"
     assert result["result"].data[CONF_HAS_HEATER] is True
+    # Room panels are an add-on: not ticked unless the user says so.
+    assert result["result"].data[CONF_HAS_MAXICONTROL] is False
 
 
 async def test_cannot_connect(hass: HomeAssistant) -> None:

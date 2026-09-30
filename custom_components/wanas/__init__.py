@@ -11,6 +11,7 @@ from .const import (
     BINARY_SENSOR_DESCRIPTIONS,
     DOMAIN,
     NUMBER_DESCRIPTIONS,
+    SENSOR_DESCRIPTIONS,
     SWITCH_DESCRIPTIONS,
 )
 from .coordinator import WanasCoordinator
@@ -35,7 +36,12 @@ def _purge_absent_modules(hass: HomeAssistant, entry: WanasConfigEntry) -> None:
     coordinator: WanasCoordinator = entry.runtime_data
     absent = {
         f"{device_key(entry)}_{desc.key}"
-        for desc in (*BINARY_SENSOR_DESCRIPTIONS, *SWITCH_DESCRIPTIONS, *NUMBER_DESCRIPTIONS)
+        for desc in (
+            *SENSOR_DESCRIPTIONS,
+            *BINARY_SENSOR_DESCRIPTIONS,
+            *SWITCH_DESCRIPTIONS,
+            *NUMBER_DESCRIPTIONS,
+        )
         if not coordinator.has_feature(desc.feature)
     }
     if not absent:

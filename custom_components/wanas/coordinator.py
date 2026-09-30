@@ -24,6 +24,7 @@ from .const import (
     DEFAULT_PROTOCOL,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    FEATURE_DEFAULTS,
     FEATURES,
     MAX_READ_BLOCK,
     PROTOCOL_TCP,
@@ -98,7 +99,7 @@ class WanasCoordinator(DataUpdateCoordinator[dict[int, int]]):
         # Optional modules the unit does not have: options win over the original
         # answers from the config flow, so they can be corrected later.
         self.features: dict[str, bool] = {
-            name: entry.options.get(name, entry.data.get(name, True))
+            name: entry.options.get(name, entry.data.get(name, FEATURE_DEFAULTS[name]))
             for name in FEATURES
         }
 

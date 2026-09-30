@@ -13,7 +13,7 @@ setup kept for reference. No build system, no tests, no linting.
 
 ```
 custom_components/wanas/
-├── const.py                      # register map: 11 sensors, 10 binary sensors,
+├── const.py                      # register map: 17 sensors, 10 binary sensors,
 │                                 #   5 switches, 8 numbers, all keyed to registers
 ├── coordinator.py                # pymodbus client, read blocks capped at 16 registers
 ├── config_flow.py                # connection step + optional register/name overrides

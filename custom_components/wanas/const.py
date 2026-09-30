@@ -33,6 +33,7 @@ CONF_SLAVE_ID = "slave_id"
 CONF_HAS_HEATER = "has_heater"
 CONF_HAS_COOLER = "has_cooler"
 CONF_HAS_HUMIDIFIER = "has_humidifier"
+CONF_HAS_MAXICONTROL = "has_maxicontrol"
 CONF_PROTOCOL = "protocol"
 CONF_REGISTERS = "registers"
 CONF_SHOW_ADVANCED = "show_advanced"
@@ -42,7 +43,22 @@ CONF_SHOW_ADVANCED = "show_advanced"
 FEATURE_HEATER = CONF_HAS_HEATER
 FEATURE_COOLER = CONF_HAS_COOLER
 FEATURE_HUMIDIFIER = CONF_HAS_HUMIDIFIER
-FEATURES: tuple[str, ...] = (FEATURE_HEATER, FEATURE_COOLER, FEATURE_HUMIDIFIER)
+FEATURE_MAXICONTROL = CONF_HAS_MAXICONTROL
+FEATURES: tuple[str, ...] = (
+    FEATURE_HEATER,
+    FEATURE_COOLER,
+    FEATURE_HUMIDIFIER,
+    FEATURE_MAXICONTROL,
+)
+# Heater, cooler and humidifier default to present, as they were before the question
+# existed. maxiCONTROL room panels are an add-on, so entries created before it was
+# asked about must not suddenly grow six entities.
+FEATURE_DEFAULTS: dict[str, bool] = {
+    FEATURE_HEATER: True,
+    FEATURE_COOLER: True,
+    FEATURE_HUMIDIFIER: True,
+    FEATURE_MAXICONTROL: False,
+}
 
 PROTOCOL_RTU_OVER_TCP = "rtu_over_tcp"
 PROTOCOL_TCP = "tcp"
@@ -75,6 +91,7 @@ class WanasSensorDescription:
     unit: str | None = None
     device_class: SensorDeviceClass | None = None
     state_class: SensorStateClass | None = None
+    feature: str | None = None
     entity_category: EntityCategory | None = None
 
 
@@ -206,6 +223,69 @@ SENSOR_DESCRIPTIONS: tuple[WanasSensorDescription, ...] = (
         name="System Errors",
         address=37,
         entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    # maxiCONTROL room panels. Addresses and scaling come from a user's working
+    # Modbus YAML (GitHub issue #1); the manufacturer table in config/hardware stops
+    # at register 54, so these are not confirmed against it.
+    WanasSensorDescription(
+        key="room_temperature",
+        name="Room Temperature",
+        address=65,
+        scale=0.1,
+        unit=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        feature=FEATURE_MAXICONTROL,
+    ),
+    WanasSensorDescription(
+        key="bathroom_1_temperature",
+        name="Bathroom 1 Temperature",
+        address=66,
+        scale=0.1,
+        unit=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        feature=FEATURE_MAXICONTROL,
+    ),
+    WanasSensorDescription(
+        key="bathroom_2_temperature",
+        name="Bathroom 2 Temperature",
+        address=67,
+        scale=0.1,
+        unit=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        feature=FEATURE_MAXICONTROL,
+    ),
+    WanasSensorDescription(
+        key="room_humidity",
+        name="Room Humidity",
+        address=55,
+        scale=0.1,
+        unit=PERCENTAGE,
+        device_class=SensorDeviceClass.HUMIDITY,
+        state_class=SensorStateClass.MEASUREMENT,
+        feature=FEATURE_MAXICONTROL,
+    ),
+    WanasSensorDescription(
+        key="bathroom_1_humidity",
+        name="Bathroom 1 Humidity",
+        address=56,
+        scale=0.1,
+        unit=PERCENTAGE,
+        device_class=SensorDeviceClass.HUMIDITY,
+        state_class=SensorStateClass.MEASUREMENT,
+        feature=FEATURE_MAXICONTROL,
+    ),
+    WanasSensorDescription(
+        key="bathroom_2_humidity",
+        name="Bathroom 2 Humidity",
+        address=57,
+        scale=0.1,
+        unit=PERCENTAGE,
+        device_class=SensorDeviceClass.HUMIDITY,
+        state_class=SensorStateClass.MEASUREMENT,
+        feature=FEATURE_MAXICONTROL,
     ),
 )
 
@@ -587,7 +667,7 @@ def get_default_register_config() -> dict[str, int | str]:
 def feature_addresses(feature: str) -> set[int]:
     """Registers that exist only because of one optional module."""
     addrs: set[int] = set()
-    for desc in BINARY_SENSOR_DESCRIPTIONS:
+    for desc in (*SENSOR_DESCRIPTIONS, *BINARY_SENSOR_DESCRIPTIONS):
         if desc.feature == feature:
             addrs.add(desc.address)
     for desc in (*SWITCH_DESCRIPTIONS, *NUMBER_DESCRIPTIONS):

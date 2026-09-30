@@ -13,6 +13,7 @@ from custom_components.wanas.const import (
     CONF_HAS_COOLER,
     CONF_HAS_HEATER,
     CONF_HAS_HUMIDIFIER,
+    CONF_HAS_MAXICONTROL,
     DOMAIN,
 )
 from custom_components.wanas.coordinator import _build_read_blocks
@@ -134,3 +135,27 @@ async def test_absent_module_is_reported_by_the_coordinator(
     assert coordinator.has_feature(CONF_HAS_COOLER) is False
     assert coordinator.has_feature(CONF_HAS_HEATER) is True
     assert coordinator.has_feature(None) is True
+
+
+@pytest.mark.parametrize("fitted", [False, True])
+async def test_maxicontrol_registers_follow_the_module(
+    hass: HomeAssistant, mock_client, fitted: bool
+) -> None:
+    """Registers 55-57 and 65-67 are only polled when the room panels are declared."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        version=2,
+        unique_id="192.0.2.10:5503:1",
+        data={**CONNECTION, CONF_HAS_MAXICONTROL: fitted},
+    )
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    blocks = entry.runtime_data.read_blocks
+    covered = {addr for start, count in blocks for addr in range(start, start + count)}
+    panel = {55, 56, 57, 65, 66, 67}
+    assert (panel <= covered) is fitted
+    assert not fitted or all(count <= 16 for _, count in blocks)
+    if not fitted:
+        assert not panel & covered

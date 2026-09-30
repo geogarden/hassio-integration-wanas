@@ -18,7 +18,7 @@ Monitor temperatures, airflow, fan speeds, filter status — and toggle bypass, 
   controls for bypass, GWC, humidifier, heater, cooler, the timed functions and the fan
   power setpoints
 - **Polish and English** entity and config-flow names, picked from the Home Assistant language
-- **Asks which optional modules the unit has** (heater, cooler, humidifier) and skips their
+- **Asks which optional modules the unit has** (heater, cooler, humidifier, maxiCONTROL room panels) and skips their
   entities entirely when they are not fitted; changeable afterwards without re-adding
 - **Three protocols**: RTU over TCP (default), plain TCP, UDP
 - **Advanced mode** lets you retarget every Modbus register and rename any entity
@@ -69,6 +69,10 @@ Monitor temperatures, airflow, fan speeds, filter status — and toggle bypass, 
    | Heater | `binary_sensor` heater state, `switch` heater, `number` heater days |
    | Cooler | `binary_sensor` cooler state, `switch` cooler, `number` cooler days |
    | Humidifier | `binary_sensor` humidifier state, `switch` humidifier |
+   | maxiCONTROL room panels | room and bathroom 1/2 temperature and humidity `sensor`s |
+
+   maxiCONTROL is unticked by default, and entries created before it was asked about
+   treat it as absent.
 
 5. The integration will test the connection before saving
 
@@ -105,6 +109,15 @@ so the Polish column is what a Polish instance displays.
 | 29 | Extra probe temperature | Temperatura dodatkowa |
 | 36 | Filter replacement | Wymiana filtra |
 | 37 | System errors | Błędy systemu |
+| 55 | Room humidity (maxiCONTROL) | Wilgotność w pokoju |
+| 56 | Bathroom 1 humidity (maxiCONTROL) | Wilgotność w łazience 1 |
+| 57 | Bathroom 2 humidity (maxiCONTROL) | Wilgotność w łazience 2 |
+| 65 | Room temperature (maxiCONTROL) | Temperatura w pokoju |
+| 66 | Bathroom 1 temperature (maxiCONTROL) | Temperatura w łazience 1 |
+| 67 | Bathroom 2 temperature (maxiCONTROL) | Temperatura w łazience 2 |
+
+Registers 55 to 57 and 65 to 67 come from a user's working Modbus setup (issue #1); the
+manufacturer table in `config/hardware/` ends at register 54.
 
 ### Binary sensors
 

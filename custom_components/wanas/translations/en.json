@@ -12,7 +12,8 @@
           "show_advanced": "Show advanced configuration",
           "has_heater": "Unit has a heater",
           "has_cooler": "Unit has a cooler",
-          "has_humidifier": "Unit has a humidifier"
+          "has_humidifier": "Unit has a humidifier",
+          "has_maxicontrol": "Unit has maxiCONTROL room panels"
         }
       },
       "registers": {
@@ -43,7 +44,19 @@
               "filter_replacement_name": "Filter replacement (name)",
               "filter_replacement_address": "Filter replacement (address)",
               "system_errors_name": "System errors (name)",
-              "system_errors_address": "System errors (address)"
+              "system_errors_address": "System errors (address)",
+              "room_temperature_name": "Room temperature (name)",
+              "room_temperature_address": "Room temperature (address)",
+              "bathroom_1_temperature_name": "Bathroom 1 temperature (name)",
+              "bathroom_1_temperature_address": "Bathroom 1 temperature (address)",
+              "bathroom_2_temperature_name": "Bathroom 2 temperature (name)",
+              "bathroom_2_temperature_address": "Bathroom 2 temperature (address)",
+              "room_humidity_name": "Room humidity (name)",
+              "room_humidity_address": "Room humidity (address)",
+              "bathroom_1_humidity_name": "Bathroom 1 humidity (name)",
+              "bathroom_1_humidity_address": "Bathroom 1 humidity (address)",
+              "bathroom_2_humidity_name": "Bathroom 2 humidity (name)",
+              "bathroom_2_humidity_address": "Bathroom 2 humidity (address)"
             }
           },
           "binary_sensors": {
@@ -206,6 +219,24 @@
       },
       "system_errors": {
         "name": "System errors"
+      },
+      "room_temperature": {
+        "name": "Room temperature"
+      },
+      "bathroom_1_temperature": {
+        "name": "Bathroom 1 temperature"
+      },
+      "bathroom_2_temperature": {
+        "name": "Bathroom 2 temperature"
+      },
+      "room_humidity": {
+        "name": "Room humidity"
+      },
+      "bathroom_1_humidity": {
+        "name": "Bathroom 1 humidity"
+      },
+      "bathroom_2_humidity": {
+        "name": "Bathroom 2 humidity"
       }
     },
     "binary_sensor": {
@@ -335,6 +366,7 @@
           "has_heater": "Unit has a heater",
           "has_cooler": "Unit has a cooler",
           "has_humidifier": "Unit has a humidifier",
+          "has_maxicontrol": "Unit has maxiCONTROL room panels",
           "scan_interval": "Polling interval (seconds)"
         }
       }
