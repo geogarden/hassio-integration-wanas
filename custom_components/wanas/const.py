@@ -37,6 +37,7 @@ CONF_HAS_MAXICONTROL = "has_maxicontrol"
 CONF_PROTOCOL = "protocol"
 CONF_REGISTERS = "registers"
 CONF_SHOW_ADVANCED = "show_advanced"
+CONF_CONFIGURE_REGISTERS = "configure_registers"
 
 # Optional modules. A unit without one of these still answers on the matching
 # registers, so absence cannot be probed - it has to be declared by the user.

@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Home Assistant integration for a **Wanas heat recovery ventilator (HRV)** controlled via
 **Modbus RTU over TCP**. The repository holds two things: the `custom_components/wanas`
 Python integration, which is what ships via HACS, and a `config/` tree of the older YAML
-setup kept for reference. No build system, no tests, no linting.
+setup kept for reference. No build system; `pytest` suite in `tests/` and Ruff
+(`ruff.toml`), both run by `.github/workflows/validate.yml` on GitHub only.
 
 ## Architecture
 

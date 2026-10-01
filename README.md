@@ -83,9 +83,15 @@ off removes its entities from the registry rather than leaving them unavailable.
 
 If your device uses non-standard register mapping:
 
-1. Enable **Advanced Mode** in your Home Assistant user profile
-2. Add the integration — after successful connection test, a second step appears
+1. Add the integration and tick **Show advanced configuration** on the first form
+2. After a successful connection test, a second step appears
 3. Modify any register address (all fields are pre-filled with defaults)
+
+The same form is available after setup: open **Configure** on the integration card and tick
+**Reconfigure register addresses and names**. It opens on the values currently in use. Only
+fields that differ from the defaults are stored, so an untouched field keeps following the
+built-in register map when a later release corrects it, and restoring every field to its
+default removes the overrides altogether.
 
 This is useful for custom firmware or alternative Wanas device variants.
 
@@ -190,9 +196,9 @@ python3 -m venv .venv && .venv/bin/pip install pytest-homeassistant-custom-compo
 .venv/bin/python -m pytest
 ```
 
-20 tests covering the config and options flows, setup, the version 2 migration, module
-gating, read blocking, bus serialisation, error mapping and diagnostics. Coverage is 93 %
-overall and 94 % on `config_flow.py`.
+26 tests covering the config and options flows (including remapping registers after setup),
+setup, the version 2 migration, module gating, read blocking, bus serialisation, error
+mapping and diagnostics. Coverage is 93 % overall and 95 % on `config_flow.py`.
 
 ## Languages
 
