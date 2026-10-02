@@ -23,6 +23,7 @@ custom_components/wanas/
 ├── select.py                     # schedule day (register 8)
 ├── time.py, schedule.py          # period 1-4 until (registers 10-13), period maths
 ├── button.py, clock.py           # clock sync button, register 50/51 encoding
+├── recovery.py                   # heat recovery maths; sensor.py adds power/efficiency/energy
 ├── services.py, services.yaml    # wanas.get_schedule / wanas.set_schedule
 ├── frontend.py, www/wanas-cards.js  # cards served by the integration (add_extra_js_url),
 │                                 #   vanilla web components, no build step

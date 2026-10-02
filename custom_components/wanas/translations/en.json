@@ -234,6 +234,30 @@
       },
       "current_period": {
         "name": "Current schedule period"
+      },
+      "heat_recovery_power": {
+        "name": "Heat recovery power",
+        "state_attributes": {
+          "mode": {
+            "name": "Mode",
+            "state": {
+              "heating": "Heating",
+              "cooling": "Cooling"
+            }
+          },
+          "temperature_gain": {
+            "name": "Supply air temperature gain"
+          },
+          "extract_side_power": {
+            "name": "Extract-side power"
+          }
+        }
+      },
+      "heat_recovery_efficiency": {
+        "name": "Heat recovery efficiency"
+      },
+      "heat_recovery_energy": {
+        "name": "Recovered energy"
       }
     },
     "binary_sensor": {

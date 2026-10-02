@@ -27,7 +27,8 @@ const TEXT = {
     forced: (g, p) => `Bieg ${g} wymusza wejście cyfrowe rekuperatora. Program na teraz: bieg ${p}.`,
     modules: "Moduły", timed: "Funkcje czasowe", now: "Teraz w harmonogramie", period: "przedział",
     clockOk: "zegar sterownika zgodny", clockOff: (m) => `zegar sterownika ${m > 0 ? "+" : ""}${m} min`,
-    setClock: "ustaw zegar", recovery: "odzysk", bypass: "bypass",
+    setClock: "ustaw zegar", recovery: "odzysk", bypass: "bypass", cooling: "chłód",
+    today: (v) => `dziś ${v}kWh`, notRecovering: "nie liczy się", recoveryTile: "Odzysk",
     names: { bypass: "Bypass", gwc: "GWC", heater: "Nagrzewnica", cooler: "Chłodnica", humidifier: "Nawilżacz",
       fireplace_switch: "Kominek", party_switch: "Impreza", vacation_switch: "Urlop" },
     dayShort: ["pon", "wt", "śr", "czw", "pt", "sob", "nie"],
@@ -49,7 +50,8 @@ const TEXT = {
     forced: (g, p) => `Speed ${g} is forced by the unit's digital input. The schedule says speed ${p}.`,
     modules: "Modules", timed: "Timed functions", now: "Now in the schedule", period: "period",
     clockOk: "controller clock in sync", clockOff: (m) => `controller clock ${m > 0 ? "+" : ""}${m} min`,
-    setClock: "set clock", recovery: "recovery", bypass: "bypass",
+    setClock: "set clock", recovery: "recovery", bypass: "bypass", cooling: "cooling",
+    today: (v) => `today ${v}kWh`, notRecovering: "not counted", recoveryTile: "Recovery",
     names: { bypass: "Bypass", gwc: "Ground loop", heater: "Heater", cooler: "Cooler", humidifier: "Humidifier",
       fireplace_switch: "Fireplace", party_switch: "Party", vacation_switch: "Vacation" },
     dayShort: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
@@ -127,6 +129,7 @@ function fmtTemp(v) {
 }
 
 const hm = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+const fmtKw = (w) => (w / 1000).toFixed(2).replace(".", ",");
 const toMin = (t) => { const [h, m] = String(t).split(":"); return +h * 60 + +m; };
 
 /* ======================================================================== card 1 */
@@ -195,7 +198,7 @@ class WanasCard extends HTMLElement {
       .core { fill: var(--wc-track); stroke: var(--wc-soft); stroke-width: 1.2; }
       .fan { transform-box: fill-box; transform-origin: center; animation: spin linear infinite; }
       @keyframes spin { to { transform: rotate(360deg); } }
-      .ro { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+      .ro { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
       .r { display: grid; gap: 2px; padding: 9px 11px; border-radius: 12px; background: var(--wc-track); cursor: pointer; min-width: 0; }
       .r .k { font-size: 12px; color: var(--wc-soft); }
       .r .v { font-family: var(--wc-mono); font-size: 21px; font-weight: 500; font-variant-numeric: tabular-nums; }
@@ -228,7 +231,8 @@ class WanasCard extends HTMLElement {
         <path id="pB" class="duct" d="M230 80 C 300 40, 330 40, 370 60 L 380 170" stroke="var(--wc-accent)" stroke-dasharray="1 9" stroke-width="3" opacity="0"/>
         <rect class="core" x="268" y="93" width="64" height="64" rx="6" transform="rotate(45 300 125)"/>
         <text class="lbl" x="300" y="210" text-anchor="middle">${t.core}</text>
-        <text id="eff" x="300" y="129" text-anchor="middle" style="font-size:12px"></text>
+        <text id="eff" x="300" y="122" text-anchor="middle" style="font-size:12px"></text>
+        <text id="effP" x="300" y="138" text-anchor="middle" style="font-size:11px; fill: var(--wc-soft)"></text>
         <g transform="translate(150 80)"><g class="fan" id="f1"><circle r="13" fill="var(--ha-card-background, var(--card-background-color, #111))" stroke="var(--wc-soft)"/><path d="M0 -9 C4 -6 4 -2 0 0 C-4 2 -4 6 0 9 M-9 0 C-6 -4 -2 -4 0 0 C2 4 6 4 9 0" stroke="var(--primary-text-color)" stroke-width="1.6" fill="none"/></g></g>
         <g transform="translate(470 80)"><g class="fan" id="f2"><circle r="13" fill="var(--ha-card-background, var(--card-background-color, #111))" stroke="var(--wc-soft)"/><path d="M0 -9 C4 -6 4 -2 0 0 C-4 2 -4 6 0 9 M-9 0 C-6 -4 -2 -4 0 0 C2 4 6 4 9 0" stroke="var(--primary-text-color)" stroke-width="1.6" fill="none"/></g></g>
         <text class="lbl" x="30" y="62">${t.intake}</text><text class="t" id="tO" x="30" y="44" data-k="outdoor_temperature"></text>
@@ -239,6 +243,7 @@ class WanasCard extends HTMLElement {
       <div class="ro">
         <div class="r" data-k="supply_fan_speed"><span class="k">${t.gear}</span><span class="v" id="gear"></span><span class="n" id="gearN"></span></div>
         <div class="r" data-k="supply_airflow"><span class="k">${t.flow}</span><span class="v" id="flow"></span><span class="n" id="flowN"></span></div>
+        <div class="r" data-k="heat_recovery_power" id="rbox"><span class="k">${t.recoveryTile}</span><span class="v" id="rec"></span><span class="n" id="recN"></span></div>
         <div class="r" data-k="filter_replacement" id="fbox"><span class="k">${t.filter}</span><span class="v" id="filt"></span><span class="n" id="filtN"></span></div>
       </div>
       <div class="ov" id="ov" hidden><span class="tag" id="ovTag"></span><span id="ovText"></span></div>
@@ -251,6 +256,27 @@ class WanasCard extends HTMLElement {
     }
     this._built = true;
     this._sig = "";
+  }
+
+  // Today's recovered energy from recorder statistics, at most every five minutes.
+  async _fetchToday() {
+    const id = this._id("sensor", "heat_recovery_energy");
+    if (!id || this._todayBusy || Date.now() - (this._todayAt || 0) < 300000) return;
+    this._todayBusy = true;
+    try {
+      const r = await this._hass.callWS({
+        type: "recorder/statistic_during_period", statistic_id: id,
+        calendar: { period: "day" }, types: ["change"],
+      });
+      this._today = typeof r?.change === "number" ? r.change : null;
+      this._todayAt = Date.now();
+      this._sig = "";
+      this._update();
+    } catch (e) {
+      this._todayAt = Date.now();
+    } finally {
+      this._todayBusy = false;
+    }
   }
 
   _moreInfo(entityId) {
@@ -274,8 +300,16 @@ class WanasCard extends HTMLElement {
     const out = s("outdoor_temperature"), exh = s("exhaust_temperature"), sup = s("supply_temperature"), ind = s("indoor_temperature");
     const gear = s("supply_fan_speed") ?? 0, flowS = s("supply_airflow"), flowE = s("exhaust_airflow"), filter = s("filter_replacement");
     const bypass = on("binary_sensor", "bypass_state") || on("switch", "bypass");
-    const eff = out != null && ind != null && sup != null && ind !== out ? (sup - out) / (ind - out) : null;
+    // Recovery sensors when enabled; with the efficiency sensor disabled the ratio is computed here.
+    const recId = this._id("sensor", "heat_recovery_power");
+    const recState = recId ? h.states[recId] : null;
+    const recW = recId ? num(h, recId) : null;
+    const cooling = recState?.attributes?.mode === "cooling";
+    const effS = this._id("sensor", "heat_recovery_efficiency");
+    const eff = effS ? (num(h, effS) == null ? null : num(h, effS) / 100)
+      : out != null && ind != null && sup != null && ind !== out ? (sup - out) / (ind - out) : null;
     const effTxt = bypass ? t.bypass : eff == null ? "—" : `${Math.round(Math.max(0, Math.min(1, eff)) * 100)}%`;
+    const powTxt = recW == null ? "" : `${cooling ? t.cooling + " " : ""}${fmtKw(recW)} kW`;
     const cur = h.states[this._id("sensor", "current_period")];
     const progSpeed = cur?.attributes?.speed;
     const input3 = on("binary_sensor", "input_speed_3"), input1 = on("binary_sensor", "input_speed_1");
@@ -283,7 +317,7 @@ class WanasCard extends HTMLElement {
 
     if (this._config.compact) {
       $("g").textContent = ROMAN[gear] ?? gear;
-      $("l2").textContent = `${flowS ?? "—"} m³/h · ${t.supply} ${fmtTemp(sup)} · ${bypass ? t.bypass : `${t.recovery} ${effTxt}`}`;
+      $("l2").textContent = `${flowS ?? "—"} m³/h · ${t.supply} ${fmtTemp(sup)} · ${bypass ? t.bypass : `${t.recovery} ${effTxt}${powTxt ? ` · ${powTxt}` : ""}`}`;
       $("rf").textContent = filter == null ? "—" : `${filter} ${t.days}`;
       $("r").classList.toggle("warn", filterWarn);
       return;
@@ -300,6 +334,13 @@ class WanasCard extends HTMLElement {
     $("gS0").setAttribute("stop-color", col(out)); $("gS1").setAttribute("stop-color", col(sup));
     $("gE0").setAttribute("stop-color", col(ind)); $("gE1").setAttribute("stop-color", col(exh));
     $("eff").textContent = effTxt;
+    $("effP").textContent = bypass ? "" : powTxt;
+    const gain = recState?.attributes?.temperature_gain;
+    $("rec").innerHTML = recW == null ? "—" : `${fmtKw(recW)}<small>kW</small>`;
+    $("recN").textContent = recW == null ? (recId ? t.notRecovering : "")
+      : (this._today != null ? t.today(this._today.toFixed(1).replace(".", ",")) : gain != null ? `${cooling ? "−" : "+"}${String(gain).replace(".", ",")} K` : "");
+    $("rbox").hidden = !recId;
+    this._fetchToday();
     const dur = [0, 3.2, 1.8, 0.9][gear] || 0;
     for (const id of ["dS", "dE"]) { $(id).style.animationDuration = dur ? `${dur}s` : "0s"; $(id).style.opacity = gear ? 1 : 0; }
     for (const id of ["f1", "f2"]) $(id).style.animationDuration = gear ? `${dur * 0.6}s` : "0s";
