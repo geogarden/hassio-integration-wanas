@@ -91,7 +91,9 @@ pymodbus client, so it needs no hardware and no mock server.
 - **50–51**: Controller clock, verified on the real unit on 2026-10-01: date
   `day<<11 | month<<7 | (year-2000)` (as in the DTR), time `hour<<8 | minute` (the DTR
   example says `hour<<7` and is wrong). Local wall time, no zone
-- **52–54**: Fan power / flow setpoints per speed, 1 to 100 %
+- **52–54**: Fan setpoints per speed: percent of power, or airflow in m³/h in constant-flow
+  mode. The table says 1 to 100 %, the real unit in flow mode holds 100/200/400, so the
+  numbers take 1 to 1600 with no unit
 - **72–74**: In the DTR (manual speed, manual setpoint, software version), but this
   firmware answers reads of all three with a Modbus error (checked 2026-10-02). Not exposed
 
