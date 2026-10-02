@@ -217,3 +217,24 @@ async def test_schedule_call_for_an_unknown_entry_is_refused(
             blocking=True, return_response=True,
         )
     assert unit.writes == []
+
+
+async def test_timed_function_switch_arms_the_longest_run_and_follows_the_countdown(
+    hass: HomeAssistant, loaded, unit: FakeUnit
+) -> None:
+    """Fireplace on writes 180 s; it stays on while register 44 counts down."""
+    switch_id = _entity_id(hass, "switch", "fireplace_switch")
+    await hass.services.async_call(
+        "switch", "turn_on", {"entity_id": switch_id}, blocking=True
+    )
+    assert unit.regs[44] == 180
+
+    unit.regs[44] = 95
+    await loaded.runtime_data.async_refresh()
+    await hass.async_block_till_done()
+    assert hass.states.get(switch_id).state == "on"
+
+    unit.regs[44] = 0
+    await loaded.runtime_data.async_refresh()
+    await hass.async_block_till_done()
+    assert hass.states.get(switch_id).state == "off"

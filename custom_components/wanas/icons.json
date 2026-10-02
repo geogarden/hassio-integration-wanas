@@ -31,7 +31,10 @@
       "bypass": { "default": "mdi:pipe-disconnected" },
       "humidifier": { "default": "mdi:air-humidifier" },
       "heater": { "default": "mdi:radiator" },
-      "cooler": { "default": "mdi:snowflake" }
+      "cooler": { "default": "mdi:snowflake" },
+      "vacation_switch": { "default": "mdi:bag-suitcase" },
+      "fireplace_switch": { "default": "mdi:fireplace" },
+      "party_switch": { "default": "mdi:party-popper" }
     },
     "number": {
       "heater_days": { "default": "mdi:radiator" },

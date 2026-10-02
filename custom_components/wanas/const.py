@@ -424,6 +424,31 @@ SWITCH_DESCRIPTIONS: tuple[WanasSwitchDescription, ...] = (
         verify_address=34,
         feature=FEATURE_COOLER,
     ),
+    # One-tap versions of the timed functions: on writes the longest duration the
+    # register allows, off writes 0. Fireplace and party count down in the register
+    # itself, so "on" means "still running"; vacation reports through register 35.
+    # The matching numbers set any other duration.
+    WanasSwitchDescription(
+        key="vacation_switch",
+        name="Vacation Switch",
+        write_address=43,
+        verify_address=35,
+        on_value=30,
+    ),
+    WanasSwitchDescription(
+        key="fireplace_switch",
+        name="Fireplace Switch",
+        write_address=44,
+        verify_address=44,
+        on_value=180,
+    ),
+    WanasSwitchDescription(
+        key="party_switch",
+        name="Party Switch",
+        write_address=45,
+        verify_address=45,
+        on_value=720,
+    ),
 )
 
 NUMBER_DESCRIPTIONS: tuple[WanasNumberDescription, ...] = (

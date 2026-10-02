@@ -13,7 +13,7 @@ Monitor temperatures, airflow, fan speeds, filter status — and toggle bypass, 
 
 ## Features
 
-- **51 entities** built on the manufacturer register table: airflow, five temperatures, fan
+- **54 entities** built on the manufacturer register table: airflow, five temperatures, fan
   speeds, filter countdown, the six status flags, the four digital inputs, writable
   controls for bypass, GWC, humidifier, heater, cooler, the timed functions and the fan
   power setpoints, the weekly program and the controller clock
@@ -99,8 +99,8 @@ This is useful for custom firmware or alternative Wanas device variants.
 
 ## Entities
 
-51 entities on a fully equipped unit without maxiCONTROL: 12 sensors, 10 binary sensors,
-5 switches, 22 numbers, 1 select and 1 button. Names are translated, so the Polish column is
+54 entities on a fully equipped unit without maxiCONTROL: 12 sensors, 10 binary sensors,
+8 switches, 22 numbers, 1 select and 1 button. Names are translated, so the Polish column is
 what a Polish instance displays.
 
 ### Sensors
@@ -155,6 +155,13 @@ Registers 46 to 49 are the controller's read-only digital inputs.
 | 40 → 32 | Humidifier | Nawilżacz |
 | 41 → 33 | Heater | Nagrzewnica |
 | 42 → 34 | Cooler | Chłodnica |
+| 43 → 35 | Vacation (30 days) | Urlop (30 dni) |
+| 44 → 44 | Fireplace (3 min) | Kominek (3 min) |
+| 45 → 45 | Party (12 h) | Impreza (12 h) |
+
+The last three are one-tap versions of the timed functions: on writes the longest duration
+the register takes, off writes 0, and the switch stays on while the counter runs down. The
+numbers below set any other duration.
 
 ### Numbers
 

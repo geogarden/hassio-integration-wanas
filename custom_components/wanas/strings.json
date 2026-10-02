@@ -289,6 +289,15 @@
       },
       "cooler": {
         "name": "Cooler"
+      },
+      "vacation_switch": {
+        "name": "Vacation (30 days)"
+      },
+      "fireplace_switch": {
+        "name": "Fireplace (3 min)"
+      },
+      "party_switch": {
+        "name": "Party (12 h)"
       }
     },
     "number": {
