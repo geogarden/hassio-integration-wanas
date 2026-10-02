@@ -231,6 +231,9 @@
       },
       "schedule_summary": {
         "name": "Schedule (selected day)"
+      },
+      "current_period": {
+        "name": "Current schedule period"
       }
     },
     "binary_sensor": {
@@ -567,6 +570,10 @@
         "config_entry_id": {
           "name": "Unit",
           "description": "The Wanas unit, needed only when more than one is set up."
+        },
+        "refresh": {
+          "name": "Refresh",
+          "description": "Read the week from the unit instead of the cached copy (writes the day selector seven times)."
         }
       }
     },

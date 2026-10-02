@@ -256,6 +256,42 @@ The DTR also lists registers 72 (manual fan speed), 73 (manual temperature setpo
 (software version). The Combo 430 this was developed on answers all three with a Modbus
 error, so they are not exposed.
 
+## Dashboard cards
+
+The integration ships two Lovelace cards and registers them itself, so there is no
+resource to add: after installing or updating, reload the browser and pick them in the
+card picker, or add them in YAML:
+
+```yaml
+type: custom:wanas-card            # airflow diagram, temperatures, speed, filter, modules
+type: custom:wanas-card
+compact: true                      # one-row tile
+type: custom:wanas-schedule-card   # five periods per day, as on the unit's panel
+```
+
+- **wanas-card** draws the airflow through the unit: duct colours follow the air
+  temperature, the dashes move at the fan speed, an open bypass reroutes the supply past
+  the core, and the core shows heat recovery from the four temperatures. Below: speed (with
+  a note when a digital input forces it against the schedule), airflow, filter days (amber
+  at 7 or fewer), the fitted modules, the timed functions with their countdown, and the
+  period the schedule is in now. The controller clock is only mentioned when it drifts by
+  more than two minutes, with a button to set it.
+- **wanas-schedule-card** shows one day as a 24-hour timeline (bar height is the fan
+  speed, the number above is the temperature) and a table of the five periods. Edits follow
+  the same rules as the `time` entities; one save can write several days.
+- Both find their entities through the entity registry, so renamed entity ids keep
+  working. With more than one unit, add `device_id: <id>`.
+- Colours come from the theme (`--primary-color`, `--warning-color`, `--divider-color`...).
+
+The integration keeps a copy of the whole week in memory: read at start-up and every day
+at 03:17, updated by every poll for the selected day and by every schedule write.
+`wanas.get_schedule` answers from it; pass `refresh: true` to read the unit again. A week
+read writes the day selector seven times, which is why it is not done on every poll.
+The **Current schedule period** sensor (state 1-5, attributes `from`, `until`, `speed`,
+`temperature`, `day`) comes from the same copy.
+
+A static prototype of both cards is in `docs/cards-prototype.html`.
+
 ## Requirements
 
 - **Home Assistant 2024.7 or newer.** The advanced step uses `data_entry_flow.section`,

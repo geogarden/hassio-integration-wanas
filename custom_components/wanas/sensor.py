@@ -25,7 +25,7 @@ from .const import (
 )
 from .coordinator import WanasCoordinator
 from .entity import device_info, device_key
-from .schedule import day_periods, summary
+from .schedule import DAY_MINUTES, day_periods, summary
 
 # Read-only, values come from the coordinator.
 PARALLEL_UPDATES = 0
@@ -45,6 +45,7 @@ async def async_setup_entry(
     ]
     entities.append(WanasClockSensor(coordinator, entry))
     entities.append(WanasScheduleSensor(coordinator, entry))
+    entities.append(WanasCurrentPeriodSensor(coordinator, entry))
     async_add_entities(entities)
 
 
@@ -164,3 +165,64 @@ class WanasScheduleSensor(CoordinatorEntity[WanasCoordinator], SensorEntity):
             "day": SCHEDULE_DAYS[day] if day is not None and 0 <= day < 7 else None,
             "periods": periods,
         }
+
+
+class WanasCurrentPeriodSensor(CoordinatorEntity[WanasCoordinator], SensorEntity):
+    """Which schedule period the unit runs now, from today's program in the week cache.
+
+    State: the period number, 1-5. Attributes: from, until, speed, temperature and the
+    day. Unknown until the first week read has finished.
+    """
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "current_period"
+
+    def __init__(self, coordinator: WanasCoordinator, entry: ConfigEntry) -> None:
+        """Initialize the current period sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{device_key(entry)}_current_period"
+        self._attr_device_info = device_info(entry)
+
+    def _now(self) -> tuple[str, dict] | None:
+        week = self.coordinator.week
+        if not week:
+            return None
+        now = dt_util.now()
+        day = (now.weekday() + 1) % 7  # 0 = Sunday, as register 8 counts
+        program = week.get(day)
+        if not program:
+            return None
+        periods = day_periods(program)
+        minutes = now.hour * 60 + now.minute
+        for number, period in enumerate(periods, start=1):
+            start = _minutes(period["from"])
+            end = DAY_MINUTES if number == len(periods) else _minutes(period["until"])
+            if start <= minutes < end:
+                return SCHEDULE_DAYS[day], {"number": number, **period}
+        return None
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the period number."""
+        now = self._now()
+        return now[1]["number"] if now else None
+
+    @property
+    def extra_state_attributes(self) -> dict | None:
+        """Return the period's from, until, speed, temperature and the day."""
+        now = self._now()
+        if not now:
+            return None
+        day, period = now
+        return {
+            "day": day,
+            "from": period["from"],
+            "until": period["until"],
+            "speed": period["speed"],
+            "temperature": period["temperature"],
+        }
+
+
+def _minutes(text: str) -> int:
+    hours, _, minutes = text.partition(":")
+    return int(hours) * 60 + int(minutes)

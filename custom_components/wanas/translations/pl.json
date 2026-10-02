@@ -231,6 +231,9 @@
       },
       "schedule_summary": {
         "name": "Harmonogram (wybrany dzień)"
+      },
+      "current_period": {
+        "name": "Bieżący przedział harmonogramu"
       }
     },
     "binary_sensor": {
@@ -567,6 +570,10 @@
         "config_entry_id": {
           "name": "Urządzenie",
           "description": "Rekuperator Wanas, potrzebny tylko przy więcej niż jednym."
+        },
+        "refresh": {
+          "name": "Odśwież",
+          "description": "Odczytaj tydzień z urządzenia zamiast z pamięci (siedem zapisów wyboru dnia)."
         }
       }
     },
