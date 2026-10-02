@@ -359,13 +359,13 @@
         "name": "Temperatura strefy 5"
       },
       "fan_power_1": {
-        "name": "Moc biegu 1"
+        "name": "Moc/przepływ biegu 1"
       },
       "fan_power_2": {
-        "name": "Moc biegu 2"
+        "name": "Moc/przepływ biegu 2"
       },
       "fan_power_3": {
-        "name": "Moc biegu 3"
+        "name": "Moc/przepływ biegu 3"
       }
     },
     "select": {

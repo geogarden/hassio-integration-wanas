@@ -359,13 +359,13 @@
         "name": "Zone 5 temperature"
       },
       "fan_power_1": {
-        "name": "Fan power 1"
+        "name": "Fan power/flow 1"
       },
       "fan_power_2": {
-        "name": "Fan power 2"
+        "name": "Fan power/flow 2"
       },
       "fan_power_3": {
-        "name": "Fan power 3"
+        "name": "Fan power/flow 3"
       }
     },
     "select": {

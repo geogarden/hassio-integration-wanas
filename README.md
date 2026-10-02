@@ -172,9 +172,13 @@ numbers below set any other duration.
 | 43 | 0 to 30 | dni | Vacation days | Tryb urlopowy (dni) |
 | 44 | 0 to 180 | s | Fireplace | Funkcja kominek |
 | 45 | 0 to 720 | min | Party | Funkcja impreza |
-| 52 | 1 to 100 | % | Fan power 1 | Moc biegu 1 |
-| 53 | 1 to 100 | % | Fan power 2 | Moc biegu 2 |
-| 54 | 1 to 100 | % | Fan power 3 | Moc biegu 3 |
+| 52 | 1 to 1600 | % or m³/h | Fan power/flow 1 | Moc/przepływ biegu 1 |
+| 53 | 1 to 1600 | % or m³/h | Fan power/flow 2 | Moc/przepływ biegu 2 |
+| 54 | 1 to 1600 | % or m³/h | Fan power/flow 3 | Moc/przepływ biegu 3 |
+
+Registers 52 to 54 hold fan power in percent, or the airflow in m³/h when the unit runs in
+constant-flow mode. The manufacturer table gives 1 to 100 %, but a Combo 430 in flow mode
+reads 100, 200 and 400 there, so the numbers accept up to 1600 and carry no unit.
 
 Registers 41 and 42 are day counters on the device. The switches write 1, arming them
 for a day; the matching Heater days / Cooler days numbers give the full 0 to 180 range

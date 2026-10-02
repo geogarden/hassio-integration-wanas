@@ -62,6 +62,12 @@ ALWAYS_READ_ADDRESSES: frozenset[int] = frozenset(
 # Day counters on registers 41 and 42 run to 180 days (DTR Combo 430/630, 04.2026).
 MAX_MODULE_DAYS = 180
 
+# Registers 52-54 are "Moc/Przepływ": percent of fan power, or the airflow in m³/h when
+# the unit runs in constant-flow mode. The manufacturer table says 1-100 %, but the unit
+# this was written against holds 100/200/400 in flow mode, so the range follows the
+# airflow ceiling of register 0 and no unit is claimed.
+MAX_FAN_SETPOINT = 1600
+
 CONF_SCAN_INTERVAL = "scan_interval"
 CONF_SLAVE_ID = "slave_id"
 CONF_HAS_HEATER = "has_heater"
@@ -662,9 +668,8 @@ NUMBER_DESCRIPTIONS: tuple[WanasNumberDescription, ...] = (
         write_address=52,
         verify_address=52,
         min_value=1,
-        max_value=100,
+        max_value=MAX_FAN_SETPOINT,
         step=1,
-        unit=PERCENTAGE,
     ),
     WanasNumberDescription(
         key="fan_power_2",
@@ -672,9 +677,8 @@ NUMBER_DESCRIPTIONS: tuple[WanasNumberDescription, ...] = (
         write_address=53,
         verify_address=53,
         min_value=1,
-        max_value=100,
+        max_value=MAX_FAN_SETPOINT,
         step=1,
-        unit=PERCENTAGE,
     ),
     WanasNumberDescription(
         key="fan_power_3",
@@ -682,9 +686,8 @@ NUMBER_DESCRIPTIONS: tuple[WanasNumberDescription, ...] = (
         write_address=54,
         verify_address=54,
         min_value=1,
-        max_value=100,
+        max_value=MAX_FAN_SETPOINT,
         step=1,
-        unit=PERCENTAGE,
     ),
 )
 
