@@ -28,6 +28,40 @@ MAX_SCAN_INTERVAL = 600
 # coordinator update fail, so keep requests short.
 MAX_READ_BLOCK = 16
 
+# Weekly program. Register 8 does not report the current weekday: it selects which
+# day registers 10-23 show and accept (0 = Sunday ... 6 = Saturday). Verified on a
+# Combo 430 on 2026-10-02: writing a zone on Saturday left Sunday and Friday as they
+# were. 10-13 are zone ends in minutes, 14-18 zone fan speeds, 19-23 zone setpoints.
+SCHEDULE_DAY_ADDRESS = 8
+SCHEDULE_FIRST_ADDRESS = 10
+SCHEDULE_REGISTER_COUNT = 14
+SCHEDULE_ZONE_END_ADDRESSES = (10, 11, 12, 13)
+SCHEDULE_ZONE_SPEED_ADDRESSES = (14, 15, 16, 17, 18)
+SCHEDULE_ZONE_TEMPERATURE_ADDRESSES = (19, 20, 21, 22, 23)
+SCHEDULE_DAYS = (
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+)
+
+# Controller clock. Date is day<<11 | month<<7 | (year - 2000), as in the DTR. Time
+# is hour<<8 | minute: the DTR example says hour<<7, the unit itself does not.
+CLOCK_DATE_ADDRESS = 50
+CLOCK_TIME_ADDRESS = 51
+
+# Read on every poll whatever the register options say: the program day selector
+# and the clock have fixed addresses and are not remappable.
+ALWAYS_READ_ADDRESSES: frozenset[int] = frozenset(
+    {SCHEDULE_DAY_ADDRESS, CLOCK_DATE_ADDRESS, CLOCK_TIME_ADDRESS}
+)
+
+# Day counters on registers 41 and 42 run to 180 days (DTR Combo 430/630, 04.2026).
+MAX_MODULE_DAYS = 180
+
 CONF_SCAN_INTERVAL = "scan_interval"
 CONF_SLAVE_ID = "slave_id"
 CONF_HAS_HEATER = "has_heater"
@@ -380,7 +414,7 @@ SWITCH_DESCRIPTIONS: tuple[WanasSwitchDescription, ...] = (
         verify_address=33,
         feature=FEATURE_HEATER,
     ),
-    # Registers 41 and 42 are day counters (0-60) rather than booleans, but writing
+    # Registers 41 and 42 are day counters (0-180) rather than booleans, but writing
     # 1 arms them for a day, which is how the unit has always been driven here. The
     # matching WanasNumber entities expose the full day range.
     WanasSwitchDescription(
@@ -399,7 +433,7 @@ NUMBER_DESCRIPTIONS: tuple[WanasNumberDescription, ...] = (
         write_address=41,
         verify_address=41,
         min_value=0,
-        max_value=60,
+        max_value=MAX_MODULE_DAYS,
         step=1,
         unit=UnitOfTime.DAYS,
         feature=FEATURE_HEATER,
@@ -410,7 +444,7 @@ NUMBER_DESCRIPTIONS: tuple[WanasNumberDescription, ...] = (
         write_address=42,
         verify_address=42,
         min_value=0,
-        max_value=60,
+        max_value=MAX_MODULE_DAYS,
         step=1,
         unit=UnitOfTime.DAYS,
         feature=FEATURE_COOLER,

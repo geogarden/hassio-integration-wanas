@@ -237,6 +237,9 @@
       },
       "bathroom_2_humidity": {
         "name": "Bathroom 2 humidity"
+      },
+      "controller_clock": {
+        "name": "Controller clock"
       }
     },
     "binary_sensor": {
@@ -354,6 +357,25 @@
       },
       "fan_power_3": {
         "name": "Fan power 3"
+      }
+    },
+    "select": {
+      "program_day": {
+        "name": "Program day",
+        "state": {
+          "sunday": "Sunday",
+          "monday": "Monday",
+          "tuesday": "Tuesday",
+          "wednesday": "Wednesday",
+          "thursday": "Thursday",
+          "friday": "Friday",
+          "saturday": "Saturday"
+        }
+      }
+    },
+    "button": {
+      "sync_clock": {
+        "name": "Set clock from Home Assistant"
       }
     }
   },
@@ -530,6 +552,57 @@
               "fan_power_3_verify_address": "Fan power 3 (verify address)"
             }
           }
+        }
+      }
+    }
+  },
+  "selector": {
+    "day": {
+      "options": {
+        "sunday": "Sunday",
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday"
+      }
+    }
+  },
+  "services": {
+    "get_schedule": {
+      "name": "Get weekly program",
+      "description": "Reads zone ends, fan speeds and temperatures for all seven days. The program day selector is put back afterwards.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Unit",
+          "description": "The Wanas unit, needed only when more than one is set up."
+        }
+      }
+    },
+    "set_schedule": {
+      "name": "Set weekly program",
+      "description": "Writes zones of the weekly program for the chosen days. Lists you leave out stay as they are; the program day selector is put back afterwards.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Unit",
+          "description": "The Wanas unit, needed only when more than one is set up."
+        },
+        "days": {
+          "name": "Days",
+          "description": "Days to write."
+        },
+        "zone_ends": {
+          "name": "Zone ends",
+          "description": "Four increasing end times of zones 1-4, as HH:MM or minutes after midnight, in quarter hours. Zone 5 runs to midnight."
+        },
+        "zone_speeds": {
+          "name": "Zone fan speeds",
+          "description": "Five fan speeds (0-3) for zones 1-5."
+        },
+        "zone_temperatures": {
+          "name": "Zone temperatures",
+          "description": "Five setpoints (10-30 °C) for zones 1-5."
         }
       }
     }

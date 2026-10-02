@@ -237,6 +237,9 @@
       },
       "bathroom_2_humidity": {
         "name": "Wilgotność w łazience 2"
+      },
+      "controller_clock": {
+        "name": "Zegar sterownika"
       }
     },
     "binary_sensor": {
@@ -354,6 +357,25 @@
       },
       "fan_power_3": {
         "name": "Moc biegu 3"
+      }
+    },
+    "select": {
+      "program_day": {
+        "name": "Dzień programu",
+        "state": {
+          "sunday": "Niedziela",
+          "monday": "Poniedziałek",
+          "tuesday": "Wtorek",
+          "wednesday": "Środa",
+          "thursday": "Czwartek",
+          "friday": "Piątek",
+          "saturday": "Sobota"
+        }
+      }
+    },
+    "button": {
+      "sync_clock": {
+        "name": "Ustaw zegar z Home Assistant"
       }
     }
   },
@@ -530,6 +552,57 @@
               "fan_power_3_verify_address": "Moc biegu 3 (adres weryfikacji)"
             }
           }
+        }
+      }
+    }
+  },
+  "selector": {
+    "day": {
+      "options": {
+        "sunday": "Niedziela",
+        "monday": "Poniedziałek",
+        "tuesday": "Wtorek",
+        "wednesday": "Środa",
+        "thursday": "Czwartek",
+        "friday": "Piątek",
+        "saturday": "Sobota"
+      }
+    }
+  },
+  "services": {
+    "get_schedule": {
+      "name": "Odczytaj program tygodniowy",
+      "description": "Czyta końce stref, biegi i temperatury dla wszystkich siedmiu dni. Wybór dnia programu jest potem przywracany.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Urządzenie",
+          "description": "Rekuperator Wanas, potrzebny tylko przy więcej niż jednym."
+        }
+      }
+    },
+    "set_schedule": {
+      "name": "Zapisz program tygodniowy",
+      "description": "Zapisuje strefy programu tygodniowego dla wybranych dni. Pominięte listy zostają bez zmian; wybór dnia programu jest potem przywracany.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Urządzenie",
+          "description": "Rekuperator Wanas, potrzebny tylko przy więcej niż jednym."
+        },
+        "days": {
+          "name": "Dni",
+          "description": "Dni do zapisania."
+        },
+        "zone_ends": {
+          "name": "Końce stref",
+          "description": "Cztery rosnące godziny końca stref 1-4, jako GG:MM albo minuty od północy, co kwadrans. Strefa 5 trwa do północy."
+        },
+        "zone_speeds": {
+          "name": "Biegi stref",
+          "description": "Pięć biegów (0-3) dla stref 1-5."
+        },
+        "zone_temperatures": {
+          "name": "Temperatury stref",
+          "description": "Pięć temperatur zadanych (10-30 °C) dla stref 1-5."
         }
       }
     }
