@@ -32,10 +32,16 @@ so it waits for a release that includes #9.
    `number.party_mode`, `number.fireplace_mode`); cooler/heater also exist as read-only
    `binary_sensor`. `switch.wanas_chlodnica` (48 references, the writers'-room AC logic in
    `hvac/`) has no switch equivalent — that automation needs logic rework, not a rename.
-3. **Features micpub 0.2.1 lacks entirely**: `controller_clock` sensor, `sync_clock` button,
-   our schedule-editing entities (`time.period_*_until`, `select.program_day`). micpub does the
-   weekly schedule differently: `sensor.weekly_schedule` / `weekly_schedule_day` + service
-   `update_weekly_schedule_zone` + card `wanas-vent-card`.
+3. **Features implemented differently (not missing).** The controller clock IS in micpub as
+   writable `date.device_date` + `time.device_time` (reg 50/51, same encoding) — our combined
+   `controller_clock` sensor is redundant; only our `sync_clock` button has no equivalent
+   (proposed upstream as micpub PR #12). The weekly schedule IS in micpub: full read
+   (`sensor.weekly_schedule` / `weekly_schedule_day`) + edit service `update_weekly_schedule_zone`
+   + card `wanas-vent-card`; our editable `time.period_*_until` / `select.program_day` are a
+   different UX that conflicts with micpub's day-restore logic, so they are not upstreamed.
+   The cooler/heater/vacation/party/fireplace registers (41-45) are days/seconds/minutes
+   counters, so micpub's `number.*_mode` is more correct than our on/off `switch.*`; we do not
+   upstream switches.
 
 ## Entity crosswalk (by internal key)
 
@@ -63,10 +69,10 @@ Our key (uid suffix) → micpub 0.2.1 key. `=` clean map, `~` semantic but diffe
 | party_switch (switch) | switch.wanas_impreza | number.party_mode | ✗ model change |
 | fireplace_switch (switch) | switch.wanas_kominek | number.fireplace_mode | ✗ model change |
 | zone_1..5_speed (number) | number.wanas_rekuperator_bieg_strefy_* | speed1/2/3_airflow / manual_fan_speed | ✗ zones differ |
-| controller_clock (sensor) | sensor.wanas_rekuperator_zegar_sterownika | — | ✗ none |
-| sync_clock (button) | button.wanas_rekuperator_ustaw_zegar... | — | ✗ none |
-| period_1..4_until (time) | time.rekuperator_wanas_..._przedzial_* | — | ✗ none (service-based) |
-| program_day (select) | select.wanas_rekuperator_dzien_programu | — | ✗ none |
+| controller_clock (sensor) | sensor.wanas_rekuperator_zegar_sterownika | date.device_date + time.device_time (reg 50/51) | ~ clock exists, split read/write |
+| sync_clock (button) | button.wanas_rekuperator_ustaw_zegar... | (micpub PR #12, pending) | ✗ pending #12 |
+| period_1..4_until (time) | time.rekuperator_wanas_..._przedzial_* | service update_weekly_schedule_zone | ~ service-based, no editable entity |
+| program_day (select) | select.wanas_rekuperator_dzien_programu | sensor.weekly_schedule_day + service | ~ service-based, day not UI-settable |
 | schedule_summary / current_period | sensor.rekuperator_wanas_... | weekly_schedule / weekly_schedule_day | ~ different |
 | heat_recovery_power/efficiency/energy | sensor.rekuperator_wanas_... | (micpub#9, not released) | ✗ pending |
 
@@ -101,5 +107,9 @@ Active references to our entity_ids (prod registry + repo grep 2026-10-20):
 - `feature/heat-recovery` → PR #9 (OPEN, rebased on upstream/main 2026-10-20).
 - `fix/unsupported-registers` → PR #8 (OPEN, rebased 2026-10-20).
 - `feature/diagnostics` → PR #10 (MERGED).
-- Not yet upstreamed (would reduce the ✗ list above): controller clock + sync button, the
-  schedule-editing entities, the richer two-card frontend.
+- `feature/sync-clock-button` → PR #12 (OPEN, 2026-10-20) — the one genuinely missing feature.
+- Deliberately NOT upstreamed (would be rejected or regressive): on/off `switch.*` for
+  cooler/heater/vacation/party/fireplace (micpub's `number.*_mode` is correct for the
+  days/seconds counters); editable schedule entities (conflict with micpub's day-restore);
+  the richer two-card frontend (micpub ships his own card). These become micpub equivalents
+  at migration, not upstream PRs.
