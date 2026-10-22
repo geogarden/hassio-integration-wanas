@@ -1,6 +1,6 @@
 {
-  "domain": "wanas",
-  "name": "Wanas",
+  "domain": "wanas_community",
+  "name": "Wanas (Community)",
   "after_dependencies": [
     "frontend",
     "http"
@@ -19,5 +19,5 @@
   "requirements": [
     "pymodbus>=3.10.0"
   ],
-  "version": "3.5.2"
+  "version": "4.0.0"
 }

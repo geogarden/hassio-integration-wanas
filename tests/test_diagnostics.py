@@ -5,7 +5,7 @@ from __future__ import annotations
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 
-from custom_components.wanas.diagnostics import async_get_config_entry_diagnostics
+from custom_components.wanas_community.diagnostics import async_get_config_entry_diagnostics
 
 
 async def test_diagnostics_redacts_the_host(

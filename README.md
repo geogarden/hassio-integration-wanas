@@ -1,4 +1,4 @@
-# Wanas heat recovery ventilator for Home Assistant
+# Wanas heat recovery ventilator for Home Assistant (Community edition)
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
 [![Release](https://img.shields.io/github/v/release/jrx-code/hassio-integration-wanas)](https://github.com/jrx-code/hassio-integration-wanas/releases/latest)
@@ -10,6 +10,11 @@ Local control of a **Wanas** heat recovery ventilator (Combo 430/630 and relativ
 **Modbus** (RTU over TCP, TCP or UDP): temperatures, airflow, heat recovery, filter, modules,
 timed functions, the weekly schedule and the controller clock, plus two dashboard cards that
 ship with the integration.
+
+This is the **community edition**. It uses its own `wanas_community` domain, so it installs
+side by side with the default-store [`micpub/homeassistant-wanas`](https://github.com/micpub/homeassistant-wanas)
+integration (same pattern as `tuya`/`localtuya`). Pick whichever fits you, or run both; this
+one carries extra features (heat recovery sensors, a clock-sync button, writable mode controls).
 
 <table>
   <tr>
@@ -46,7 +51,7 @@ ship with the integration.
   polled; the energy sensor works in the Energy dashboard.
 - **Weekly schedule as the unit's panel shows it**: five periods a day with until times,
   speed and temperature, editable per day in the card or for the whole week with
-  `wanas.set_schedule`.
+  `wanas_community.set_schedule`.
 - **Optional modules declared, not guessed**: heater, cooler, humidifier and maxiCONTROL
   entities are created only when fitted, and can be changed later without re-adding.
 - **Safe on a shared RS485 bus**: one exchange at a time, reads of at most 16 registers,
@@ -62,13 +67,13 @@ The repository is not in the HACS default store yet, so add it as a custom repos
 
 1. HACS → three-dot menu → **Custom repositories**.
 2. Repository `https://github.com/jrx-code/hassio-integration-wanas`, type **Integration**.
-3. Find **hassio-integration-wanas** and download it. (A different integration in the store
-   called "Wanas" uses the same `wanas` domain; do not install both.)
+3. Find **Wanas (Community)** and download it. (This edition uses the `wanas_community`
+   domain, so it coexists with the default-store "Wanas" integration - you may have both.)
 4. Restart Home Assistant.
 
 ### Manual
 
-Copy `custom_components/wanas` into `config/custom_components/` and restart Home Assistant.
+Copy `custom_components/wanas_community` into `config/custom_components/` and restart Home Assistant.
 
 ## Configuration
 
@@ -227,13 +232,13 @@ only).
 
 ```yaml
 # Read all seven days: {monday: {periods: [{from, until, speed, temperature}, ...]}, ...}
-action: wanas.get_schedule
+action: wanas_community.get_schedule
 data:
   refresh: true          # optional: read the unit instead of the in-memory copy
 response_variable: week
 
 # Write whole days, one row per period, like the panel's table
-action: wanas.set_schedule
+action: wanas_community.set_schedule
 data:
   days: [monday, tuesday, wednesday, thursday, friday]
   periods:
@@ -384,9 +389,9 @@ python3 -m venv .venv
 blocking, bus serialisation and deadlines, schedule periods and services, the clock, heat
 recovery and the served cards. CI runs Hassfest, HACS validation, Ruff and pytest.
 
-Translations live in `custom_components/wanas/translations/` (English and Polish, 65 entity
+Translations live in `custom_components/wanas_community/translations/` (English and Polish, 65 entity
 names); a new language is one file with the keys of `strings.json`. The cards are plain web
-components in `custom_components/wanas/www/wanas-cards.js`, no build step.
+components in `custom_components/wanas_community/www/wanas-cards.js`, no build step.
 
 ## License
 

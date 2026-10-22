@@ -1,26 +1,36 @@
-# Migration: jrx-code/hassio-integration-wanas → micpub/homeassistant-wanas
+# Coexistence: jrx-code/hassio-integration-wanas as the "Wanas (Community)" edition
 
-Status date: 2026-10-20. Source of truth for the live set: prod HA entity registry
+Status date: 2026-10-22. Source of truth for the live set: prod HA entity registry
 (`core.entity_registry`, read 2026-10-20) and micpub `0.2.1` translations.
 
-## Why
+## Decision (2026-10-22): coexist, do not retire
 
-`micpub/homeassistant-wanas` is in the HACS **default** store and owns the same `wanas`
-domain, so the two integrations cannot be installed side by side. Our hacs/default PR
-(`hacs/default#11501`) was withdrawn 2026-10-19. The plan is to retire this custom
-integration and run micpub's, after pushing our extra features upstream.
+Earlier plan was to retire this integration and move to `micpub/homeassistant-wanas` after
+upstreaming our extras. Dropped, because micpub's reviews gated our key feature on the vendor:
+on PR #9 (heat recovery) he wrote "i will have to ask the company if they want to show such
+sensors", and he wants #8 and #12 reworked to his design. We do not control that timeline.
 
-## HOLD — do not cut over yet
+Instead this integration continues as a parallel **community edition** under its own domain
+`wanas_community` (renamed from `wanas` in v4.0.0, 2026-10-22). Two integrations can now be
+installed side by side, same pattern as core `tuya` + `localtuya` or `xiaomi_miio` +
+`xiaomi_miot`. micpub stays the default/vendor-blessed one; this one carries the extras
+(heat recovery, clock-sync button, writable mode switches, the `switch.wanas_chlodnica`
+logic the TV-room automations use).
 
-Cutover on prod HA and archiving this repo are **blocked** until micpub merges our open
-PRs and ships a release that contains them:
+The `hacs/default#11501` submission (withdrawn 2026-10-19 over the `wanas` domain clash) can
+be resubmitted under the distinct `wanas_community` domain, which no longer collides.
 
-- `micpub/homeassistant-wanas#9` — heat recovery sensors (power / efficiency / energy). **OPEN.**
-- `micpub/homeassistant-wanas#8` — skip unsupported registers instead of failing the poll. **OPEN.**
-- `micpub/homeassistant-wanas#10` — config entry diagnostics. **MERGED 2026-10-20** (not yet in a tagged release; latest tag is 0.2.1, 2026-08-19).
+Upstream PRs stay **open** as goodwill; micpub is free to take any of them. Their ideas are
+tracked here as issues #24 (diagnostics as modbus operation history + connection-status
+attributes, under coordinator lock), #25 (opt-in auto-sync clock switch), #26 (skip-unsupported
+logic must cover the weekly schedule read).
 
-Cutting over to released 0.2.1 now would drop heat recovery (the feature we are upstreaming),
-so it waits for a release that includes #9.
+## Cutover on prod HA — still gated
+
+The `wanas` → `wanas_community` domain rename orphans all 64 live entities exactly as a move
+to micpub would (unique_ids do not carry across a domain change), so the prod entity remap is
+the same scale of work. It is **not** done yet: it runs only after an explicit go, on VM 103
+first, via `rest`/reload rather than a restart.
 
 ## This is a rewrite, not a rename
 

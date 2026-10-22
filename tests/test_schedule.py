@@ -13,8 +13,8 @@ from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
 
-from custom_components.wanas.clock import decode_clock, encode_clock
-from custom_components.wanas.const import DOMAIN
+from custom_components.wanas_community.clock import decode_clock, encode_clock
+from custom_components.wanas_community.const import DOMAIN
 
 WARSAW = ZoneInfo("Europe/Warsaw")
 UID = "192.0.2.10:5503:1"

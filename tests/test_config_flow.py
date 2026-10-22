@@ -9,7 +9,7 @@ from homeassistant.config_entries import SOURCE_USER
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
-from custom_components.wanas.const import (
+from custom_components.wanas_community.const import (
     CONF_CONFIGURE_REGISTERS,
     CONF_HAS_COOLER,
     CONF_HAS_HEATER,
@@ -51,7 +51,7 @@ async def test_cannot_connect(hass: HomeAssistant) -> None:
         return False
 
     client.connect = connect
-    with patch("custom_components.wanas.config_flow.AsyncModbusTcpClient", return_value=client):
+    with patch("custom_components.wanas_community.config_flow.AsyncModbusTcpClient", return_value=client):
         result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], {**CONNECTION, **ALL_MODULES, "show_advanced": False}

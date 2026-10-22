@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.core import HomeAssistant
 
-from custom_components.wanas.frontend import CARDS_URL, async_register_cards
+from custom_components.wanas_community.frontend import CARDS_URL, async_register_cards
 
 
 async def test_cards_are_skipped_without_the_frontend(hass: HomeAssistant) -> None:

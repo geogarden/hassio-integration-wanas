@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 Home Assistant integration for a **Wanas heat recovery ventilator (HRV)** controlled via
-**Modbus RTU over TCP**. The repository holds two things: the `custom_components/wanas`
+**Modbus RTU over TCP**. The repository holds two things: the `custom_components/wanas_community`
 Python integration, which is what ships via HACS, and a `config/` tree of the older YAML
 setup kept for reference. No build system; `pytest` suite in `tests/` and Ruff
 (`ruff.toml`), both run by `.github/workflows/validate.yml` on GitHub only.
@@ -13,7 +13,7 @@ setup kept for reference. No build system; `pytest` suite in `tests/` and Ruff
 ## Architecture
 
 ```
-custom_components/wanas/
+custom_components/wanas_community/
 ├── const.py                      # register map: 17 sensors, 10 binary sensors,
 │                                 #   5 switches, 8 numbers, all keyed to registers
 ├── coordinator.py                # pymodbus client, read blocks capped at 16 registers,
@@ -24,7 +24,7 @@ custom_components/wanas/
 ├── time.py, schedule.py          # period 1-4 until (registers 10-13), period maths
 ├── button.py, clock.py           # clock sync button, register 50/51 encoding
 ├── recovery.py                   # heat recovery maths; sensor.py adds power/efficiency/energy
-├── services.py, services.yaml    # wanas.get_schedule / wanas.set_schedule
+├── services.py, services.yaml    # wanas_community.get_schedule / wanas_community.set_schedule
 ├── frontend.py, www/wanas-cards.js  # cards served by the integration (add_extra_js_url),
 │                                 #   vanilla web components, no build step
 ├── strings.json                  # English source for config flow and entity names

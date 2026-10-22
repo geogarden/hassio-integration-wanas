@@ -3,7 +3,7 @@ get_schedule:
     config_entry_id:
       selector:
         config_entry:
-          integration: wanas
+          integration: wanas_community
     refresh:
       default: false
       selector:
@@ -14,7 +14,7 @@ set_schedule:
     config_entry_id:
       selector:
         config_entry:
-          integration: wanas
+          integration: wanas_community
     days:
       required: true
       example: '["monday", "tuesday"]'

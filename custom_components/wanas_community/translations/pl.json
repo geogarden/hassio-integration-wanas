@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "Wanas Rekuperator",
+        "title": "Wanas Rekuperator (Community)",
         "description": "Skonfiguruj połączenie z rekuperatorem Wanas przez Modbus. Odznacz moduł, którego rekuperator nie ma, a jego encje nie powstaną.",
         "data": {
           "host": "Host",

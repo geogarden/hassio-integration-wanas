@@ -8,7 +8,7 @@ import pytest
 from homeassistant.const import CONF_HOST, CONF_PORT
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.wanas.const import (
+from custom_components.wanas_community.const import (
     CONF_HAS_COOLER,
     CONF_HAS_HEATER,
     CONF_HAS_HUMIDIFIER,
@@ -31,7 +31,7 @@ ALL_MODULES = {CONF_HAS_HEATER: True, CONF_HAS_COOLER: True, CONF_HAS_HUMIDIFIER
 
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations):
-    """Load custom_components/wanas in every test."""
+    """Load custom_components/wanas_community in every test."""
     return
 
 
@@ -63,9 +63,9 @@ def mock_client():
     client.write_register = AsyncMock(side_effect=write)
 
     with patch(
-        "custom_components.wanas.coordinator.AsyncModbusTcpClient", return_value=client
+        "custom_components.wanas_community.coordinator.AsyncModbusTcpClient", return_value=client
     ), patch(
-        "custom_components.wanas.config_flow.AsyncModbusTcpClient", return_value=client
+        "custom_components.wanas_community.config_flow.AsyncModbusTcpClient", return_value=client
     ):
         yield client
 

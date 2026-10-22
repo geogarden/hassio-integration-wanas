@@ -10,14 +10,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.wanas.const import (
+from custom_components.wanas_community.const import (
     CONF_HAS_COOLER,
     CONF_HAS_HEATER,
     CONF_HAS_HUMIDIFIER,
     CONF_HAS_MAXICONTROL,
     DOMAIN,
 )
-from custom_components.wanas.coordinator import _build_read_blocks
+from custom_components.wanas_community.coordinator import _build_read_blocks
 
 from .conftest import CONNECTION
 
@@ -172,7 +172,7 @@ async def test_a_call_that_never_returns_releases_the_bus(
     assert await hass.config_entries.async_setup(config_entry.entry_id)
     await hass.async_block_till_done()
     coordinator = config_entry.runtime_data
-    monkeypatch.setattr("custom_components.wanas.coordinator.BUS_TIMEOUT", 0.05)
+    monkeypatch.setattr("custom_components.wanas_community.coordinator.BUS_TIMEOUT", 0.05)
 
     async def hang(*args, **kwargs):
         await asyncio.Event().wait()

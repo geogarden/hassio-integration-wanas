@@ -4,7 +4,7 @@
  *   type: custom:wanas-card            unit overview: airflow diagram, readouts, modules
  *   type: custom:wanas-schedule-card   weekly schedule: five periods per day, as on the panel
  *
- * Both find their entities through the entity registry (platform "wanas" plus the
+ * Both find their entities through the entity registry (platform "wanas_community" plus the
  * entity's translation key), so renamed entity ids keep working. Optional config:
  *   device_id: <id>     pick one unit when more than one is set up
  *   compact: true       (wanas-card) a single-row tile instead of the full card
@@ -140,7 +140,7 @@ function wanasEntities(hass, deviceId) {
 }
 
 function scanEntities(registry, deviceId) {
-  const all = Object.values(registry).filter((e) => e.platform === "wanas");
+  const all = Object.values(registry).filter((e) => e.platform === "wanas_community");
   const device = deviceId || all.find((e) => e.device_id)?.device_id;
   const map = {};
   for (const e of all) {
@@ -551,7 +551,7 @@ class WanasScheduleCard extends HTMLElement {
       if (refresh) data.refresh = true;
       const entryId = this._entryId();
       if (entryId) data.config_entry_id = entryId;
-      const res = await this._hass.callService("wanas", "get_schedule", data, undefined, false, true);
+      const res = await this._hass.callService("wanas_community", "get_schedule", data, undefined, false, true);
       const week = res?.response || {};
       this._saved = DAY_KEYS.map((k) => this._fromPeriods(week[k]?.periods));
       this._week = this._saved.map((d) => JSON.parse(JSON.stringify(d)));
@@ -762,7 +762,7 @@ class WanasScheduleCard extends HTMLElement {
     const entryId = this._entryId();
     if (entryId) data.config_entry_id = entryId;
     try {
-      await this._hass.callService("wanas", "set_schedule", data);
+      await this._hass.callService("wanas_community", "set_schedule", data);
       for (const i of targets) { this._week[i] = JSON.parse(JSON.stringify(d)); this._saved[i] = JSON.parse(JSON.stringify(d)); }
       this._also.clear();
       this._toast = t.saved(targets.map((i) => t.dayLong[i]).join(", "));
@@ -826,7 +826,7 @@ class WanasCardEditor extends HTMLElement {
     const t = lang(this._hass);
     const bool = (name) => ({ name, selector: { boolean: {} } });
     const head = [
-      { name: "device_id", selector: { device: { integration: "wanas" } } },
+      { name: "device_id", selector: { device: { integration: "wanas_community" } } },
       { type: "grid", name: "", flatten: true, schema: [{ name: "title", selector: { text: {} } }, bool("hide_title")] },
     ];
     if (this.kind === "schedule") {

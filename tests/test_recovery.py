@@ -14,8 +14,8 @@ from pytest_homeassistant_custom_component.common import (
     mock_restore_cache_with_extra_data,
 )
 
-from custom_components.wanas.const import DOMAIN
-from custom_components.wanas.recovery import MODE_COOLING, MODE_HEATING, compute
+from custom_components.wanas_community.const import DOMAIN
+from custom_components.wanas_community.recovery import MODE_COOLING, MODE_HEATING, compute
 
 UID = "192.0.2.10:5503:1"
 

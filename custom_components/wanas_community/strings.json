@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "Wanas Rekuperator",
+        "title": "Wanas Rekuperator (Community)",
         "description": "Configure connection to Wanas recuperator via Modbus. Clear a module the unit does not have and its entities will not be created.",
         "data": {
           "host": "Host",

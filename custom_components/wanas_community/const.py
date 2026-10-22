@@ -15,7 +15,7 @@ from homeassistant.const import (
     UnitOfVolumeFlowRate,
 )
 
-DOMAIN = "wanas"
+DOMAIN = "wanas_community"
 
 DEFAULT_PORT = 502
 DEFAULT_SLAVE_ID = 1
