@@ -14,7 +14,7 @@
  * restart the airflow animation each time.
  */
 
-const VERSION = "3.5.2";
+const VERSION = "4.0.1";
 const ROMAN = ["0", "I", "II", "III"];
 const DAY_KEYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
@@ -92,16 +92,16 @@ const opt = (config, defaults, key) => (config && config[key] !== undefined ? co
 const NOWHERE = () => document.createElement("span");
 
 const SHARED_CSS = `
-  :host { --wc-mono: var(--code-font-family, ui-monospace, "Roboto Mono", monospace);
+  :host { --wc-font: Arial, Helvetica, sans-serif; font-family: var(--wc-font);
     --wc-accent: var(--primary-color, #5ca5ff); --wc-warn: var(--warning-color, #f0b429);
     --wc-ok: var(--success-color, #7fe1a8); --wc-soft: var(--secondary-text-color, #9aa);
     --wc-line: var(--divider-color, rgba(255,255,255,0.12)); --wc-track: rgba(127,127,127,0.12); }
-  ha-card { padding: 16px 18px 18px; }
+  ha-card { padding: 16px 18px 18px; font-family: var(--wc-font); }
   .head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   .head h2 { margin: 0; font-size: 16px; font-weight: 600; font-variant: small-caps; letter-spacing: 0.06em; text-transform: lowercase; }
-  .sub { font-family: var(--wc-mono); font-size: 11px; color: var(--wc-soft); }
+  .sub { font-family: var(--wc-font); font-size: 11px; color: var(--wc-soft); }
   .sub button { font: inherit; color: var(--wc-accent); background: none; border: 0; padding: 0 0 0 6px; cursor: pointer; }
-  .mono { font-family: var(--wc-mono); font-variant-numeric: tabular-nums; }
+  .mono { font-family: var(--wc-font); font-variant-numeric: tabular-nums; }
   .label { font-size: 12px; color: var(--wc-soft); margin: 14px 0 8px; }
   button:focus-visible { outline: 2px solid var(--wc-accent); outline-offset: 2px; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -111,7 +111,7 @@ const SHARED_CSS = `
   .chip.on { color: var(--primary-text-color); border-color: color-mix(in srgb, var(--wc-accent) 60%, transparent);
     background: color-mix(in srgb, var(--wc-accent) 14%, transparent); }
   .chip.on .dot { background: var(--wc-accent); }
-  .chip .cd { font-family: var(--wc-mono); font-size: 11px; color: var(--wc-soft); }
+  .chip .cd { font-family: var(--wc-font); font-size: 11px; color: var(--wc-soft); }
   .chip.on .cd { color: var(--wc-accent); }
   .empty { color: var(--wc-soft); font-size: 13px; padding: 8px 0; }
   /* Class rules such as .ov { display: flex } would otherwise win over the hidden attribute. */
@@ -253,11 +253,11 @@ class WanasCard extends HTMLElement {
     if (this._config.compact) {
       root.innerHTML = `<style>${SHARED_CSS}
         .tile { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 14px; align-items: center; cursor: pointer; }
-        .g { font-family: var(--wc-mono); font-size: 26px; width: 52px; height: 52px; display: grid; place-items: center;
+        .g { font-family: var(--wc-font); font-size: 26px; width: 52px; height: 52px; display: grid; place-items: center;
           border-radius: 50%; border: 1px solid color-mix(in srgb, var(--wc-accent) 55%, transparent); }
-        .l1 { font-size: 15px; } .l2 { font-family: var(--wc-mono); font-size: 12px; color: var(--wc-soft);
+        .l1 { font-size: 15px; } .l2 { font-family: var(--wc-font); font-size: 12px; color: var(--wc-soft);
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .r { text-align: right; font-family: var(--wc-mono); font-size: 12px; color: var(--wc-soft); }
+        .r { text-align: right; font-family: var(--wc-font); font-size: 12px; color: var(--wc-soft); }
         .r b { display: block; font-size: 17px; font-weight: 500; color: var(--primary-text-color); }
         .r.warn b { color: var(--wc-warn); }
       </style>
@@ -281,9 +281,11 @@ class WanasCard extends HTMLElement {
     root.innerHTML = `<style>${SHARED_CSS}
       ha-card { container-type: inline-size; }
       svg { width: 100%; height: auto; display: block; margin: 6px 0 2px; }
-      svg text { font-family: var(--wc-mono); fill: var(--primary-text-color); }
-      svg .lbl { font-family: inherit; font-variant: small-caps; letter-spacing: 0.06em; fill: var(--wc-soft); font-size: 12px; }
-      svg .t { font-size: 17px; font-weight: 500; cursor: pointer; }
+      svg text { font-family: var(--wc-font); fill: var(--primary-text-color); }
+      svg .lbl { font-family: var(--wc-font); fill: var(--wc-soft); font-size: 20px; }
+      svg .t { font-size: 30px; font-weight: 600; cursor: pointer; }
+      svg .eff { font-size: 24px; font-weight: 600; }
+      svg .eff-power { font-size: 20px; fill: var(--wc-soft); }
       .duct { fill: none; stroke-width: 7; stroke-linecap: round; }
       .dash { fill: none; stroke-width: 2; stroke-linecap: round; stroke-dasharray: 2 12; stroke: rgba(255,255,255,0.85);
         animation: none; }
@@ -292,30 +294,30 @@ class WanasCard extends HTMLElement {
       .ro { display: grid; grid-template-columns: repeat(var(--ro-cols, 4), minmax(0, 1fr)); gap: 10px; }
       .r { display: grid; gap: 2px; padding: 9px 11px; border-radius: 12px; background: var(--wc-track); cursor: pointer; min-width: 0; }
       .r .k { font-size: 12px; color: var(--wc-soft); }
-      .r .v { font-family: var(--wc-mono); font-size: 21px; font-weight: 500; font-variant-numeric: tabular-nums; }
+      .r .v { font-family: var(--wc-font); font-size: 21px; font-weight: 500; font-variant-numeric: tabular-nums; }
       .r .v small { font-size: 12px; color: var(--wc-soft); margin-left: 3px; }
-      .r .n { font-family: var(--wc-mono); font-size: 11px; color: var(--wc-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .r .n { font-family: var(--wc-font); font-size: 11px; color: var(--wc-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .r.warn { background: color-mix(in srgb, var(--wc-warn) 16%, transparent); }
       .r.warn .v { color: var(--wc-warn); }
       .ov { display: flex; gap: 10px; align-items: center; margin-top: 10px; padding: 8px 11px; border-radius: 12px;
         background: color-mix(in srgb, var(--wc-accent) 10%, transparent); font-size: 13px; }
-      .ov .tag { font-family: var(--wc-mono); font-size: 11px; color: var(--wc-accent); white-space: nowrap;
+      .ov .tag { font-family: var(--wc-font); font-size: 11px; color: var(--wc-accent); white-space: nowrap;
         border: 1px solid color-mix(in srgb, var(--wc-accent) 45%, transparent); border-radius: 6px; padding: 1px 6px; }
       .now { margin-top: 14px; padding-top: 11px; border-top: 1px solid var(--wc-line); font-size: 13px; }
-      .now b { font-family: var(--wc-mono); font-weight: 500; }
+      .now b { font-family: var(--wc-font); font-weight: 500; }
       @container (max-width: 520px) { .ro { grid-template-columns: repeat(2, minmax(0, 1fr)); } .r .v { font-size: 19px; } }
       @container (max-width: 200px) { .ro { grid-template-columns: minmax(0, 1fr); } }
       .head:empty { display: none; }
     </style>
     <ha-card class="${o("animate") ? "" : "static"}">
       <div class="head">${title}${o("show_clock") ? '<span class="sub" id="clock"></span>' : ""}</div>
-      ${o("show_diagram") ? `<svg viewBox="0 0 640 250" role="img" aria-label="${t.unit}">
+      ${o("show_diagram") ? `<svg viewBox="0 0 640 260" role="img" aria-label="${t.unit}">
         <defs>
           <linearGradient id="gS" x1="0" x2="1"><stop id="gS0" offset="0"/><stop id="gS1" offset="1"/></linearGradient>
           <linearGradient id="gE" x1="1" x2="0"><stop id="gE0" offset="0"/><stop id="gE1" offset="1"/></linearGradient>
         </defs>
         <path d="M420 230 V96 L520 40 L620 96 V230" fill="none" stroke="var(--wc-line)" stroke-width="1.2"/>
-        <text class="lbl" x="520" y="122" text-anchor="middle">${t.house}</text>
+        <text class="lbl" x="520" y="114" text-anchor="middle">${t.house}</text>
         <text class="lbl" x="150" y="128" text-anchor="middle">${t.outside}</text>
         <path id="pS" class="duct" stroke="url(#gS)" d="M30 80 H230 L300 125 L370 170 H600"/>
         <path id="dS" class="dash" d="M30 80 H230 L300 125 L370 170 H600"/>
@@ -323,16 +325,16 @@ class WanasCard extends HTMLElement {
         <path id="dE" class="dash" d="M600 80 H370 L300 125 L230 170 H30"/>
         <path id="pB" class="duct" d="M230 80 C 300 40, 330 40, 370 60 L 380 170" stroke="var(--wc-accent)" stroke-dasharray="1 9" stroke-width="3" opacity="0"/>
         <rect class="core" x="268" y="93" width="64" height="64" rx="6" transform="rotate(45 300 125)"/>
-        <text class="lbl" x="300" y="210" text-anchor="middle">${t.core}</text>
-        <rect x="266" y="109" width="68" height="34" rx="7" fill="var(--ha-card-background, var(--card-background-color, #fff))" stroke="var(--wc-line)"/>
-        <text id="eff" x="300" y="122" text-anchor="middle" style="font-size:12px"></text>
-        <text id="effP" x="300" y="138" text-anchor="middle" style="font-size:11px; fill: var(--wc-soft)"></text>
+        <text class="lbl" x="300" y="232" text-anchor="middle">${t.core}</text>
+        <rect x="224" y="94" width="152" height="64" rx="9" fill="var(--ha-card-background, var(--card-background-color, #fff))" stroke="var(--wc-line)"/>
+        <text id="eff" class="eff" x="300" y="120" text-anchor="middle"></text>
+        <text id="effP" class="eff-power" x="300" y="146" text-anchor="middle"></text>
         <g transform="translate(150 80)"><g class="fan" id="f1"><circle r="13" fill="var(--ha-card-background, var(--card-background-color, #111))" stroke="var(--wc-soft)"/><path d="M0 -9 C4 -6 4 -2 0 0 C-4 2 -4 6 0 9 M-9 0 C-6 -4 -2 -4 0 0 C2 4 6 4 9 0" stroke="var(--primary-text-color)" stroke-width="1.6" fill="none"/></g></g>
         <g transform="translate(470 80)"><g class="fan" id="f2"><circle r="13" fill="var(--ha-card-background, var(--card-background-color, #111))" stroke="var(--wc-soft)"/><path d="M0 -9 C4 -6 4 -2 0 0 C-4 2 -4 6 0 9 M-9 0 C-6 -4 -2 -4 0 0 C2 4 6 4 9 0" stroke="var(--primary-text-color)" stroke-width="1.6" fill="none"/></g></g>
-        <text class="lbl" x="30" y="62">${t.intake}</text><text class="t" id="tO" x="30" y="44" data-k="outdoor_temperature"></text>
-        <text class="lbl" x="30" y="196">${t.exhaust}</text><text class="t" id="tX" x="30" y="214" data-k="exhaust_temperature"></text>
-        <text class="lbl" x="600" y="196" text-anchor="end">${t.supply}</text><text class="t" id="tS" x="600" y="152" text-anchor="end" data-k="supply_temperature"></text>
-        <text class="lbl" x="600" y="62" text-anchor="end">${t.extract}</text><text class="t" id="tI" x="600" y="44" text-anchor="end" data-k="indoor_temperature"></text>
+        <text class="lbl" x="30" y="66">${t.intake}</text><text class="t" id="tO" x="30" y="40" data-k="outdoor_temperature"></text>
+        <text class="lbl" x="30" y="198">${t.exhaust}</text><text class="t" id="tX" x="30" y="230" data-k="exhaust_temperature"></text>
+        <text class="lbl" x="600" y="198" text-anchor="end">${t.supply}</text><text class="t" id="tS" x="600" y="152" text-anchor="end" data-k="supply_temperature"></text>
+        <text class="lbl" x="600" y="66" text-anchor="end">${t.extract}</text><text class="t" id="tI" x="600" y="40" text-anchor="end" data-k="indoor_temperature"></text>
       </svg>` : ""}
       ${o("show_readouts") && readouts ? `<div class="ro" style="--ro-cols:${Math.max(1, Math.min(4, shown.size))}">${readouts}</div>` : ""}
       <div class="ov" id="ov" hidden><span class="tag" id="ovTag"></span><span id="ovText"></span></div>
@@ -660,24 +662,24 @@ class WanasScheduleCard extends HTMLElement {
       .seg { position: relative; height: 100%; display: flex; align-items: flex-end; cursor: pointer; }
       .seg .bar { width: 100%; margin-inline: 1px; border-radius: 6px 6px 0 0; transition: height .25s; }
       .seg.sel .bar { box-shadow: 0 0 0 1px var(--primary-text-color) inset; }
-      .seg .tp { position: absolute; left: 0; right: 0; text-align: center; font-family: var(--wc-mono); font-size: 11px; color: var(--wc-soft); }
+      .seg .tp { position: absolute; left: 0; right: 0; text-align: center; font-family: var(--wc-font); font-size: 11px; color: var(--wc-soft); }
       .nowm { position: absolute; top: 12px; bottom: 18px; border-left: 1px dashed var(--wc-ok); pointer-events: none; }
-      .ax { position: absolute; left: 0; right: 0; bottom: 0; height: 16px; font-family: var(--wc-mono); font-size: 10px; color: var(--wc-soft); }
+      .ax { position: absolute; left: 0; right: 0; bottom: 0; height: 16px; font-family: var(--wc-font); font-size: 10px; color: var(--wc-soft); }
       .ax span { position: absolute; transform: translateX(-50%); } .ax span:first-child { transform: none; } .ax span:last-child { transform: translateX(-100%); }
       table { width: 100%; border-collapse: collapse; margin-top: 8px; }
       th { text-align: left; font-weight: 400; font-size: 12px; color: var(--wc-soft); padding: 5px 3px; border-bottom: 1px solid var(--wc-line);
         font-variant: small-caps; letter-spacing: 0.05em; }
       td { padding: 6px 3px; border-bottom: 1px solid var(--wc-line); }
       tr.sel td { background: color-mix(in srgb, var(--wc-accent) 6%, transparent); }
-      td.n { font-family: var(--wc-mono); font-size: 12px; color: var(--wc-soft); width: 18px; }
-      .tm { font-family: var(--wc-mono); font-size: 14px; font-variant-numeric: tabular-nums; min-width: 46px; display: inline-block; text-align: center; }
+      td.n { font-family: var(--wc-font); font-size: 12px; color: var(--wc-soft); width: 18px; }
+      .tm { font-family: var(--wc-font); font-size: 14px; font-variant-numeric: tabular-nums; min-width: 46px; display: inline-block; text-align: center; }
       .tm.fx { color: var(--wc-soft); text-align: left; }
       .step { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
-      .step button { font: inherit; font-family: var(--wc-mono); width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--wc-line);
+      .step button { font: inherit; font-family: var(--wc-font); width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--wc-line);
         background: transparent; color: var(--wc-soft); cursor: pointer; }
       .step button:disabled { opacity: .3; cursor: default; }
       .sg { display: inline-flex; border: 1px solid var(--wc-line); border-radius: 9px; overflow: hidden; }
-      .sg button { font: inherit; font-family: var(--wc-mono); font-size: 12px; color: var(--wc-soft); background: transparent; border: 0;
+      .sg button { font: inherit; font-family: var(--wc-font); font-size: 12px; color: var(--wc-soft); background: transparent; border: 0;
         padding: 4px 8px; min-width: 30px; cursor: pointer; }
       .sg button + button { border-left: 1px solid var(--wc-line); }
       .sg button.on { background: color-mix(in srgb, var(--wc-accent) 20%, transparent); color: var(--primary-text-color); }
@@ -691,7 +693,7 @@ class WanasScheduleCard extends HTMLElement {
         background: transparent; color: var(--wc-soft); }
       .btn.pri { background: var(--wc-accent); border-color: var(--wc-accent); color: var(--text-primary-color, #fff); font-weight: 600; }
       .btn:disabled { opacity: .4; cursor: default; }
-      .toast { font-family: var(--wc-mono); font-size: 12px; color: var(--wc-ok); min-height: 16px; text-align: right; margin-top: 4px; }
+      .toast { font-family: var(--wc-font); font-size: 12px; color: var(--wc-ok); min-height: 16px; text-align: right; margin-top: 4px; }
       .week { display: grid; gap: 4px; }
       .wk { display: grid; grid-template-columns: 30px minmax(0,1fr); gap: 8px; align-items: center; cursor: pointer; font-size: 11px;
         color: var(--wc-soft); font-variant: small-caps; }
@@ -807,6 +809,8 @@ const EDITOR_TEXT = {
 
 /** Visual editor for both cards; `kind` picks the option set. */
 class WanasCardEditor extends HTMLElement {
+  connectedCallback() { this.style.fontFamily = "Arial, Helvetica, sans-serif"; }
+
   setConfig(config) {
     this._config = { ...(config || {}) };
     this._render();
@@ -925,3 +929,4 @@ if (!window.customCards.some((c) => c.type === "wanas-card")) {
   );
 }
 console.info(`%c WANAS-CARDS %c ${VERSION} `, "background:#5ca5ff;color:#061224;font-weight:600", "background:#222;color:#ddd");
+
