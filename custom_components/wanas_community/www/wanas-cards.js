@@ -14,7 +14,7 @@
  * restart the airflow animation each time.
  */
 
-const VERSION = "4.0.1";
+const VERSION = "4.0.2";
 const ROMAN = ["0", "I", "II", "III"];
 const DAY_KEYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
@@ -284,8 +284,8 @@ class WanasCard extends HTMLElement {
       svg text { font-family: var(--wc-font); fill: var(--primary-text-color); }
       svg .lbl { font-family: var(--wc-font); fill: var(--wc-soft); font-size: 20px; }
       svg .t { font-size: 30px; font-weight: 600; cursor: pointer; }
-      svg .eff { font-size: 24px; font-weight: 600; }
-      svg .eff-power { font-size: 20px; fill: var(--wc-soft); }
+      svg .eff { font-size: 24px; font-weight: 600; fill: #f1f5f9; }
+      svg .eff-power { font-size: 20px; fill: #b8c5d4; }
       .duct { fill: none; stroke-width: 7; stroke-linecap: round; }
       .dash { fill: none; stroke-width: 2; stroke-linecap: round; stroke-dasharray: 2 12; stroke: rgba(255,255,255,0.85);
         animation: none; }
@@ -316,7 +316,7 @@ class WanasCard extends HTMLElement {
           <linearGradient id="gS" x1="0" x2="1"><stop id="gS0" offset="0"/><stop id="gS1" offset="1"/></linearGradient>
           <linearGradient id="gE" x1="1" x2="0"><stop id="gE0" offset="0"/><stop id="gE1" offset="1"/></linearGradient>
         </defs>
-        <path d="M420 230 V96 L520 40 L620 96 V230" fill="none" stroke="var(--wc-line)" stroke-width="1.2"/>
+        <path d="M420 230 V96 L520 40 L620 96 V230" fill="none" stroke="var(--wc-soft)" stroke-width="2"/>
         <text class="lbl" x="520" y="114" text-anchor="middle">${t.house}</text>
         <text class="lbl" x="150" y="128" text-anchor="middle">${t.outside}</text>
         <path id="pS" class="duct" stroke="url(#gS)" d="M30 80 H230 L300 125 L370 170 H600"/>
@@ -326,7 +326,7 @@ class WanasCard extends HTMLElement {
         <path id="pB" class="duct" d="M230 80 C 300 40, 330 40, 370 60 L 380 170" stroke="var(--wc-accent)" stroke-dasharray="1 9" stroke-width="3" opacity="0"/>
         <rect class="core" x="268" y="93" width="64" height="64" rx="6" transform="rotate(45 300 125)"/>
         <text class="lbl" x="300" y="232" text-anchor="middle">${t.core}</text>
-        <rect x="224" y="94" width="152" height="64" rx="9" fill="var(--ha-card-background, var(--card-background-color, #fff))" stroke="var(--wc-line)"/>
+        <rect x="224" y="94" width="152" height="64" rx="9" fill="#142333" stroke="#61788e" stroke-width="1.2"/>
         <text id="eff" class="eff" x="300" y="120" text-anchor="middle"></text>
         <text id="effP" class="eff-power" x="300" y="146" text-anchor="middle"></text>
         <g transform="translate(150 80)"><g class="fan" id="f1"><circle r="13" fill="var(--ha-card-background, var(--card-background-color, #111))" stroke="var(--wc-soft)"/><path d="M0 -9 C4 -6 4 -2 0 0 C-4 2 -4 6 0 9 M-9 0 C-6 -4 -2 -4 0 0 C2 4 6 4 9 0" stroke="var(--primary-text-color)" stroke-width="1.6" fill="none"/></g></g>
