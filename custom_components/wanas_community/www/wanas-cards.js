@@ -14,14 +14,14 @@
  * restart the airflow animation each time.
  */
 
-const VERSION = "4.0.2";
+const VERSION = "4.0.3";
 const ROMAN = ["0", "I", "II", "III"];
 const DAY_KEYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
 const TEXT = {
   pl: {
     unit: "Rekuperator", schedule: "Harmonogram", outside: "na zewnątrz", house: "dom",
-    intake: "czerpnia", exhaust: "wyrzutnia", supply: "nawiew", extract: "wywiew", core: "wymiennik",
+    extraProbe: "temp. dodatkowa", intake: "czerpnia", exhaust: "wyrzutnia", supply: "nawiew", extract: "wywiew", core: "wymiennik",
     gear: "Bieg", flow: "Przepływ", filter: "Filtr", days: "dni", toReplace: "do wymiany",
     replaceNow: "wymień filtr", program: "program", input3: "wejście III", input1: "wejście I",
     forced: (g, p) => `Bieg ${g} wymusza wejście cyfrowe rekuperatora. Program na teraz: bieg ${p}.`,
@@ -44,7 +44,7 @@ const TEXT = {
   },
   en: {
     unit: "Ventilation", schedule: "Schedule", outside: "outside", house: "house",
-    intake: "intake", exhaust: "exhaust", supply: "supply", extract: "extract", core: "core",
+    extraProbe: "extra probe", intake: "intake", exhaust: "exhaust", supply: "supply", extract: "extract", core: "core",
     gear: "Speed", flow: "Airflow", filter: "Filter", days: "days", toReplace: "left",
     replaceNow: "replace filter", program: "schedule", input3: "input III", input1: "input I",
     forced: (g, p) => `Speed ${g} is forced by the unit's digital input. The schedule says speed ${p}.`,
@@ -331,6 +331,7 @@ class WanasCard extends HTMLElement {
         <text id="effP" class="eff-power" x="300" y="146" text-anchor="middle"></text>
         <g transform="translate(150 80)"><g class="fan" id="f1"><circle r="13" fill="var(--ha-card-background, var(--card-background-color, #111))" stroke="var(--wc-soft)"/><path d="M0 -9 C4 -6 4 -2 0 0 C-4 2 -4 6 0 9 M-9 0 C-6 -4 -2 -4 0 0 C2 4 6 4 9 0" stroke="var(--primary-text-color)" stroke-width="1.6" fill="none"/></g></g>
         <g transform="translate(470 80)"><g class="fan" id="f2"><circle r="13" fill="var(--ha-card-background, var(--card-background-color, #111))" stroke="var(--wc-soft)"/><path d="M0 -9 C4 -6 4 -2 0 0 C-4 2 -4 6 0 9 M-9 0 C-6 -4 -2 -4 0 0 C2 4 6 4 9 0" stroke="var(--primary-text-color)" stroke-width="1.6" fill="none"/></g></g>
+        <text class="lbl" x="300" y="66" text-anchor="middle">${t.extraProbe}</text><text class="t" id="tExtra" x="300" y="40" text-anchor="middle" data-k="current_temperature"></text>
         <text class="lbl" x="30" y="66">${t.intake}</text><text class="t" id="tO" x="30" y="40" data-k="outdoor_temperature"></text>
         <text class="lbl" x="30" y="198">${t.exhaust}</text><text class="t" id="tX" x="30" y="230" data-k="exhaust_temperature"></text>
         <text class="lbl" x="600" y="198" text-anchor="end">${t.supply}</text><text class="t" id="tS" x="600" y="152" text-anchor="end" data-k="supply_temperature"></text>
@@ -418,6 +419,7 @@ class WanasCard extends HTMLElement {
 
     $("tO").textContent = fmtTemp(out); $("tX").textContent = fmtTemp(exh);
     $("tS").textContent = fmtTemp(sup); $("tI").textContent = fmtTemp(ind);
+    $("tExtra").textContent = fmtTemp(s("current_temperature"));
     const col = (v) => {
       if (v == null) return "var(--wc-soft)";
       const k = Math.max(0, Math.min(1, (v + 5) / 30));

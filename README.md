@@ -111,6 +111,13 @@ first form, or later **Reconfigure register addresses and names** under **Config
 address and name can be changed. Only values that differ from the defaults are stored, so
 untouched registers keep following the built-in map when a release corrects it.
 
+## 4.0.3
+
+The Wanas airflow diagram now shows the extra probe temperature (register 29,
+existing `current_temperature` sensor) above the heat recovery panel. It is
+centered over the panel and aligned with the intake and extract temperatures.
+The readout uses one decimal place and shows a dash when unavailable.
+
 ## Dashboard cards
 
 The integration registers both cards itself. After installing or updating, reload the
