@@ -1,0 +1,74 @@
+name: Publish WANAS 4.0.3
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/release-4.0.3.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-wanas-4.0.3
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      SOURCE_SHA: ${{ github.sha }}
+      TESTED_SHA: 63f8158cbff1abb3fbdd4832d6fcfe7b21e786cb
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify version and tested source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -c 'import json; assert json.load(open("custom_components/wanas_community/manifest.json"))["version"] == "4.0.3"'
+          node --check custom_components/wanas_community/www/wanas-cards.js
+          gh api "repos/${GH_REPO}/commits/${TESTED_SHA}/check-runs" > checks.json
+          python3 - <<'PY'
+          import json
+          checks = {c['name']: c['conclusion'] for c in json.load(open('checks.json'))['check_runs']}
+          for name in ('Pytest', 'Ruff', 'Hassfest'):
+              assert checks.get(name) == 'success', (name, checks)
+          PY
+          git fetch --depth=2 origin "$TESTED_SHA"
+          git diff --exit-code "$TESTED_SHA" HEAD -- custom_components README.md hacs.json
+      - name: Prepare release package
+        shell: bash
+        run: |
+          set -euo pipefail
+          git archive --format=zip HEAD custom_components/wanas_community > wanas-4.0.3.zip
+          unzip -t wanas-4.0.3.zip
+          sha256sum wanas-4.0.3.zip > wanas-4.0.3.zip.sha256
+          cat > release-notes.md <<'NOTES'
+          ## WANAS 4.0.3
+
+          - Dodano temperaturę dodatkowej sondy z rejestru 29 (`current_temperature`) do głównego schematu.
+          - Odczyt jest wyśrodkowany nad panelem odzysku ciepła i wyrównany z temperaturami czerpni i wywiewu.
+          - Temperatura jest prezentowana z jednym miejscem po przecinku, a brak odczytu jako kreska. Zachowano istniejącą skalę 0,1°C i identyfikatory encji.
+          - Wydanie zawiera również wcześniejszą poprawę kontrastu panelu odzysku i obrysu domu z wersji 4.0.2.
+
+          Sprawdzenia: Pytest, Ruff i Hassfest zakończyły się powodzeniem dla kodu wydania. Zweryfikowano odświeżanie temperatury, zero, wartości ujemne, brak odczytu oraz wyrównanie na komputerze i telefonie.
+
+          ### Aktualizacja
+          W HACS odśwież informacje o integracji Wanas (Community), pobierz wersję 4.0.3, uruchom ponownie Home Assistant i odśwież pulpit przez Ctrl+F5. Dotychczasowy YAML karty pozostaje bez zmian.
+
+          Instalacja ręczna: archiwum wanas-4.0.3.zip zawiera katalog custom_components/wanas_community. Plik .sha256 pozwala sprawdzić integralność archiwum.
+          NOTES
+      - name: Publish release
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v4.0.3 >/dev/null 2>&1; then
+            echo 'Release v4.0.3 already exists; leaving it unchanged.'
+            exit 0
+          fi
+          gh release create v4.0.3 wanas-4.0.3.zip wanas-4.0.3.zip.sha256 \
+            --target "$SOURCE_SHA" --title 'WANAS 4.0.3' --notes-file release-notes.md --latest
