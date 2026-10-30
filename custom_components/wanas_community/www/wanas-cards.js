@@ -14,7 +14,7 @@
  * restart the airflow animation each time.
  */
 
-const VERSION = "4.0.3";
+const VERSION = "4.0.4";
 const ROMAN = ["0", "I", "II", "III"];
 const DAY_KEYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
@@ -33,7 +33,7 @@ const TEXT = {
       fireplace_switch: "Kominek", party_switch: "Impreza", vacation_switch: "Urlop" },
     dayShort: ["pon", "wt", "śr", "czw", "pt", "sob", "nie"],
     dayLong: ["poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela"],
-    from: "od", to: "do", speed: "bieg", temp: "temp.", applyAlso: "Zastosuj też do:",
+    from: "od", to: "do", speed: "bieg", temp: "temp.", applyAlso: "Zastosuj też do:", tempColorHelp: "Kolor = temperatura · wysokość = bieg",
     undo: "Cofnij zmiany", save: (n, d) => (n > 1 ? `Zapisz ${n} dni` : `Zapisz ${d}`),
     saved: (d) => `Zapisano: ${d}`, week: "Tydzień", reading: "Odczyt harmonogramu…",
     readFromUnit: "odczytaj z urządzenia", readFailed: "Nie udało się odczytać harmonogramu",
@@ -56,7 +56,7 @@ const TEXT = {
       fireplace_switch: "Fireplace", party_switch: "Party", vacation_switch: "Vacation" },
     dayShort: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
     dayLong: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-    from: "from", to: "until", speed: "speed", temp: "temp.", applyAlso: "Also apply to:",
+    from: "from", to: "until", speed: "speed", temp: "temp.", applyAlso: "Also apply to:", tempColorHelp: "Colour = temperature · height = speed",
     undo: "Undo", save: (n, d) => (n > 1 ? `Save ${n} days` : `Save ${d}`),
     saved: (d) => `Saved: ${d}`, week: "Week", reading: "Reading the schedule…",
     readFromUnit: "read from unit", readFailed: "Could not read the schedule",
@@ -592,12 +592,16 @@ class WanasScheduleCard extends HTMLElement {
       root.innerHTML = `<style>${SHARED_CSS}</style><ha-card><div class="empty">${t.noDevice}</div></ha-card>`;
       return;
     }
-    const speedColor = (s) => [
-      "var(--wc-track)",
-      "color-mix(in srgb, var(--wc-accent) 45%, transparent)",
-      "color-mix(in srgb, var(--wc-accent) 72%, transparent)",
-      "var(--wc-accent)",
-    ][s] || "var(--wc-track)";
+    // Stała skala temperatur: jednakowa wartość ma ten sam kolor w całym tygodniu.
+    const tempColor = (value) => {
+      if (value === null || value === undefined || value === "" || !Number.isFinite(Number(value))) return "var(--wc-track)";
+      const stops = [[10, [79, 101, 178]], [20, [60, 148, 228]], [21, [47, 185, 144]], [22, [245, 166, 72]], [30, [221, 78, 81]]];
+      const temp = Math.max(10, Math.min(30, Number(value)));
+      const next = stops.findIndex(([threshold]) => threshold >= temp);
+      if (next <= 0) return `rgb(${stops[0][1].join(",")})`;
+      const [lo, a] = stops[next - 1], [hi, b] = stops[next], f = (temp - lo) / (hi - lo);
+      return `rgb(${a.map((c, i) => Math.round(c + (b[i] - c) * f)).join(",")})`;
+    };
     const today = (new Date().getDay() + 6) % 7;
     const d = this._week?.[this._day];
     const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
@@ -614,7 +618,7 @@ class WanasScheduleCard extends HTMLElement {
         return `<div class="seg ${i === this._sel ? "sel" : ""}" data-sel="${i}" style="width:${(b - a) / 14.4}%"
           title="${t.period} ${i + 1}: ${hm(a)}–${hm(b)}, ${ROMAN[d.speed[i]]}, ${d.temp[i]}°">
           <span class="tp" style="bottom:calc(${hgt}% + 3px)">${d.temp[i]}°</span>
-          <div class="bar" style="height:${hgt}%; background:${speedColor(d.speed[i])}"></div></div>`;
+          <div class="bar" style="height:${hgt}%; background:${tempColor(d.temp[i])}"></div></div>`;
       }).join("");
       const rows = [0, 1, 2, 3, 4].map((i) => {
         const [a, b] = this._bounds(d, i);
@@ -630,7 +634,7 @@ class WanasScheduleCard extends HTMLElement {
       const also = [0, 1, 2, 3, 4, 5, 6].filter((i) => i !== this._day)
         .map((i) => `<button class="mini ${this._also.has(i) ? "on" : ""}" data-also="${i}" title="${t.dayLong[i]}">${t.dayShort[i]}</button>`).join("");
       const week = this._week.map((wd, i) => {
-        const parts = wd ? [0, 1, 2, 3, 4].map((p) => { const [a, b] = this._bounds(wd, p); return `<i style="width:${(b - a) / 14.4}%; background:${speedColor(wd.speed[p])}"></i>`; }).join("") : "";
+        const parts = wd ? [0, 1, 2, 3, 4].map((p) => { const [a, b] = this._bounds(wd, p); return `<i title="${hm(a)}–${hm(b)} · ${ROMAN[wd.speed[p]]} · ${wd.temp[p]}°" style="width:${(b - a) / 14.4}%; background:${tempColor(wd.temp[p])}"></i>`; }).join("") : "";
         return `<div class="wk ${i === this._day ? "on" : ""}" data-day="${i}"><span>${t.dayShort[i]}</span><span class="ws">${parts}</span></div>`;
       }).join("");
       const changed = this._dirty(this._day) || this._also.size > 0;
@@ -640,6 +644,7 @@ class WanasScheduleCard extends HTMLElement {
           ${this._day === today ? `<div class="nowm" style="left:${nowMin / 14.4}%"></div>` : ""}
           <div class="ax"><span style="left:0">00</span><span style="left:25%">06</span><span style="left:50%">12</span><span style="left:75%">18</span><span style="left:100%">24</span></div>
         </div>` : ""}
+        ${o("show_timeline") || o("show_week") ? `<div class="temp-key">${t.tempColorHelp}</div>` : ""}
         ${o("show_table") ? `<table><thead><tr><th></th><th class="c-from">${t.from}</th><th>${t.to}</th><th>${t.speed}</th><th>${t.temp}</th></tr></thead><tbody>${rows}</tbody></table>` : ""}
         <div class="msg" role="status">${this._msg}</div>
         ${ro || !o("show_table") ? "" : `<div class="apply"><span>${t.applyAlso}</span>${also}</div>
@@ -668,6 +673,7 @@ class WanasScheduleCard extends HTMLElement {
       .nowm { position: absolute; top: 12px; bottom: 18px; border-left: 1px dashed var(--wc-ok); pointer-events: none; }
       .ax { position: absolute; left: 0; right: 0; bottom: 0; height: 16px; font-family: var(--wc-font); font-size: 10px; color: var(--wc-soft); }
       .ax span { position: absolute; transform: translateX(-50%); } .ax span:first-child { transform: none; } .ax span:last-child { transform: translateX(-100%); }
+      .temp-key { color: var(--wc-soft); font-size: 11px; margin: 2px 0 7px; }
       table { width: 100%; border-collapse: collapse; margin-top: 8px; }
       th { text-align: left; font-weight: 400; font-size: 12px; color: var(--wc-soft); padding: 5px 3px; border-bottom: 1px solid var(--wc-line);
         font-variant: small-caps; letter-spacing: 0.05em; }
@@ -931,4 +937,5 @@ if (!window.customCards.some((c) => c.type === "wanas-card")) {
   );
 }
 console.info(`%c WANAS-CARDS %c ${VERSION} `, "background:#5ca5ff;color:#061224;font-weight:600", "background:#222;color:#ddd");
+
 
