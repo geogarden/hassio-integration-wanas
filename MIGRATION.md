@@ -1,4 +1,4 @@
-# Coexistence: jrx-code/hassio-integration-wanas as the "Wanas (Community)" edition
+# Coexistence: geogarden/hassio-integration-wanas as the "Wanas (Community)" edition
 
 Status date: 2026-10-22. Source of truth for the live set: prod HA entity registry
 (`core.entity_registry`, read 2026-10-20) and micpub `0.2.1` translations.

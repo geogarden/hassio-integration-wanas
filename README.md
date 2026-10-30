@@ -1,8 +1,8 @@
 # Wanas heat recovery ventilator for Home Assistant (Community edition)
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
-[![Release](https://img.shields.io/github/v/release/jrx-code/hassio-integration-wanas)](https://github.com/jrx-code/hassio-integration-wanas/releases/latest)
-[![Validate](https://github.com/jrx-code/hassio-integration-wanas/actions/workflows/validate.yml/badge.svg)](https://github.com/jrx-code/hassio-integration-wanas/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/geogarden/hassio-integration-wanas)](https://github.com/geogarden/hassio-integration-wanas/releases/latest)
+[![Validate](https://github.com/geogarden/hassio-integration-wanas/actions/workflows/validate.yml/badge.svg)](https://github.com/geogarden/hassio-integration-wanas/actions/workflows/validate.yml)
 [![Home Assistant 2024.12+](https://img.shields.io/badge/Home%20Assistant-2024.12%2B-blue.svg)](https://www.home-assistant.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -66,7 +66,7 @@ one carries extra features (heat recovery sensors, a clock-sync button, writable
 The repository is not in the HACS default store yet, so add it as a custom repository:
 
 1. HACS → three-dot menu → **Custom repositories**.
-2. Repository `https://github.com/jrx-code/hassio-integration-wanas`, type **Integration**.
+2. Repository `https://github.com/geogarden/hassio-integration-wanas`, type **Integration**.
 3. Find **Wanas (Community)** and download it. (This edition uses the `wanas_community`
    domain, so it coexists with the default-store "Wanas" integration - you may have both.)
 4. Restart Home Assistant.
