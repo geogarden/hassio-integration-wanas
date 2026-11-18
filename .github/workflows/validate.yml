@@ -44,6 +44,9 @@ jobs:
       - uses: hacs/action@main
         with:
           category: integration
+          # Custom repository: validate installable contents without requiring
+          # the owner's issue tracker and topics for default-catalog inclusion.
+          ignore: issues topics
 
   lint:
     name: Ruff
