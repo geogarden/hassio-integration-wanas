@@ -1,0 +1,79 @@
+name: Publish WANAS 4.0.5
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/release-4.0.5.yml
+
+permissions:
+  contents: write
+  checks: read
+
+concurrency:
+  group: release-wanas-4.0.5
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      SOURCE_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify version and wait for validation of this commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -c 'import json; assert json.load(open("custom_components/wanas_community/manifest.json"))["version"] == "4.0.5"'
+          node --check custom_components/wanas_community/www/wanas-cards.js
+          python3 - <<'PY'
+          import json, os, subprocess, time
+          required = {'Pytest', 'Ruff', 'Hassfest', 'HACS', 'Frontend'}
+          for attempt in range(60):
+              raw = subprocess.check_output(['gh', 'api', f"repos/{os.environ['GH_REPO']}/commits/{os.environ['SOURCE_SHA']}/check-runs?per_page=100"])
+              checks = {c['name']: c['conclusion'] for c in json.loads(raw)['check_runs']}
+              if all(checks.get(name) == 'success' for name in required):
+                  print('All required checks passed:', checks)
+                  break
+              failed = {name: checks[name] for name in required if checks.get(name) in {'failure', 'cancelled', 'timed_out', 'action_required'}}
+              if failed:
+                  raise SystemExit(f'Validation failed: {failed}')
+              print('Waiting for validation:', checks, flush=True)
+              time.sleep(10)
+          else:
+              raise SystemExit('Timed out waiting for validation')
+          PY
+      - name: Package release
+        shell: bash
+        run: |
+          set -euo pipefail
+          git archive --format=zip HEAD custom_components/wanas_community > wanas-4.0.5.zip
+          unzip -t wanas-4.0.5.zip
+          sha256sum wanas-4.0.5.zip > wanas-4.0.5.zip.sha256
+          cat > release-notes.md <<'NOTES'
+          ## WANAS 4.0.5
+
+          - Nowy panel z zakładkami Przegląd, Moduły i funkcje oraz Harmonogram.
+          - Większe temperatury i czytelniejszy schemat przepływu powietrza.
+          - Sprawność odzysku i jej podpis wyśrodkowane na wymienniku.
+          - Kolory zgodne z motywem Home Assistant; zachowana konfiguracja kart i tryb kompaktowy.
+          - Harmonogram korzysta z istniejącego edytora, walidacji i zapisu integracji.
+          - Nowe testy interfejsu sprawdzają aktualizację danych, zakładki, brakujące odczyty i polecenia modułów.
+
+          Aktualizacja: pobierz wydanie w HACS, uruchom ponownie Home Assistant i odśwież pulpit przez Ctrl+Shift+R. YAML `custom:wanas-card` pozostaje bez zmian.
+          NOTES
+      - name: Publish release
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v4.0.5 >/dev/null 2>&1; then
+            echo 'Release v4.0.5 already exists; leaving it unchanged.'
+            exit 0
+          fi
+          gh release create v4.0.5 wanas-4.0.5.zip wanas-4.0.5.zip.sha256 \
+            --target "$SOURCE_SHA" --title 'WANAS 4.0.5' --notes-file release-notes.md --latest

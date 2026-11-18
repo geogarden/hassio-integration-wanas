@@ -13,6 +13,20 @@ permissions:
   contents: read
 
 jobs:
+  frontend:
+    name: Frontend
+    if: github.server_url == 'https://github.com'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node --check custom_components/wanas_community/www/wanas-cards.js
+      - run: npm test
+
   hassfest:
     name: Hassfest
     if: github.server_url == 'https://github.com'

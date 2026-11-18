@@ -111,6 +111,18 @@ first form, or later **Reconfigure register addresses and names** under **Config
 address and name can be changed. Only values that differ from the defaults are stored, so
 untouched registers keep following the built-in map when a release corrects it.
 
+## 4.0.5
+
+The full Wanas card now has three tabs: **Overview**, **Modules & functions**, and
+**Schedule**. Larger temperature readings surround the airflow diagram, with the
+recovery efficiency and its caption centered on the exchanger. The extra probe,
+airflow, recovery, speed and filter retain live readings and the existing card options.
+Module badges on the overview open the controls tab; only the controls send commands.
+The schedule tab embeds the existing weekly editor, retaining its validation and saves.
+Colours follow the Home Assistant theme. Compact cards and existing YAML continue to work.
+
+After updating through HACS, restart Home Assistant and reload the dashboard without cache.
+
 ## 4.0.3
 
 The Wanas airflow diagram now shows the extra probe temperature (register 29,

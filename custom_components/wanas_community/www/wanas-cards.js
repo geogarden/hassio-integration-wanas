@@ -14,12 +14,14 @@
  * restart the airflow animation each time.
  */
 
-const VERSION = "4.0.4";
+const VERSION = "4.0.5";
 const ROMAN = ["0", "I", "II", "III"];
 const DAY_KEYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
 const TEXT = {
   pl: {
+    overview: "Przegląd", moduleFunctions: "Moduły i funkcje", efficiency: "Sprawność odzysku",
+    outsideHeading: "Na zewnątrz", houseHeading: "W domu", scheduleWork: "Praca według harmonogramu",
     unit: "Rekuperator", schedule: "Harmonogram", outside: "na zewnątrz", house: "dom",
     extraProbe: "temp. dodatkowa", intake: "czerpnia", exhaust: "wyrzutnia", supply: "nawiew", extract: "wywiew", core: "wymiennik",
     gear: "Bieg", flow: "Przepływ", filter: "Filtr", days: "dni", toReplace: "do wymiany",
@@ -43,6 +45,8 @@ const TEXT = {
     noDevice: "Nie znaleziono urządzenia Wanas.",
   },
   en: {
+    overview: "Overview", moduleFunctions: "Modules & functions", efficiency: "Recovery efficiency",
+    outsideHeading: "Outside", houseHeading: "At home", scheduleWork: "Scheduled operation",
     unit: "Ventilation", schedule: "Schedule", outside: "outside", house: "house",
     extraProbe: "extra probe", intake: "intake", exhaust: "exhaust", supply: "supply", extract: "extract", core: "core",
     gear: "Speed", flow: "Airflow", filter: "Filter", days: "days", toReplace: "left",
@@ -179,6 +183,8 @@ class WanasCard extends HTMLElement {
   setConfig(config) {
     this._config = config || {};
     this._built = false;
+    this._activeTab = "overview";
+    this._scheduleCard = null;
     if (this.shadowRoot) this.shadowRoot.innerHTML = "";
   }
 
@@ -207,7 +213,7 @@ class WanasCard extends HTMLElement {
   // elements, and nothing at all runs while the card is off screen or the tab is hidden.
   _playState() {
     const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const run = !still && this._visible !== false && !document.hidden && this._dur > 0 && this.shadowRoot?.getElementById("dS");
+    const run = !still && this._visible !== false && !document.hidden && this._dur > 0 && (!this._activeTab || this._activeTab === "overview") && this.shadowRoot?.getElementById("dS");
     if (run && !this._timer) {
       this._timer = setInterval(() => this._frame(), 1000 / ANIMATION_FPS);
     } else if (!run && this._timer) {
@@ -237,6 +243,7 @@ class WanasCard extends HTMLElement {
     this._e = map;
     if (!this._built) this._build();
     this._update();
+    if (this._scheduleCard) this._scheduleCard.hass = hass;
   }
 
   _id(domain, key) { return this._e[`${domain}:${key}`]; }
@@ -278,76 +285,125 @@ class WanasCard extends HTMLElement {
     };
     const readouts = READOUTS.filter((k) => shown.has(k)).map((k) => tiles[k]).join("");
     const title = o("hide_title") ? "" : `<h2>${c.title || t.unit}</h2>`;
+    const hasFunctions = o("show_modules") || o("show_timed");
+    const hasSchedule = o("show_now");
     root.innerHTML = `<style>${SHARED_CSS}
-      ha-card { container-type: inline-size; }
-      svg { width: 100%; height: auto; display: block; margin: 6px 0 2px; }
-      svg text { font-family: var(--wc-font); fill: var(--primary-text-color); }
-      svg .lbl { font-family: var(--wc-font); fill: var(--wc-soft); font-size: 20px; }
-      svg .t { font-size: 30px; font-weight: 600; cursor: pointer; }
-      svg .eff { font-size: 24px; font-weight: 600; fill: #f1f5f9; }
-      svg .eff-power { font-size: 20px; fill: #b8c5d4; }
-      .duct { fill: none; stroke-width: 7; stroke-linecap: round; }
-      .dash { fill: none; stroke-width: 2; stroke-linecap: round; stroke-dasharray: 2 12; stroke: rgba(255,255,255,0.85);
-        animation: none; }
-      .core { fill: var(--wc-track); stroke: var(--wc-soft); stroke-width: 1.2; }
-      .fan { transform-box: fill-box; transform-origin: center; animation: none; }
-      .ro { display: grid; grid-template-columns: repeat(var(--ro-cols, 4), minmax(0, 1fr)); gap: 10px; }
-      .r { display: grid; gap: 2px; padding: 9px 11px; border-radius: 12px; background: var(--wc-track); cursor: pointer; min-width: 0; }
-      .r .k { font-size: 12px; color: var(--wc-soft); }
-      .r .v { font-family: var(--wc-font); font-size: 21px; font-weight: 500; font-variant-numeric: tabular-nums; }
-      .r .v small { font-size: 12px; color: var(--wc-soft); margin-left: 3px; }
-      .r .n { font-family: var(--wc-font); font-size: 11px; color: var(--wc-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .r.warn { background: color-mix(in srgb, var(--wc-warn) 16%, transparent); }
-      .r.warn .v { color: var(--wc-warn); }
-      .ov { display: flex; gap: 10px; align-items: center; margin-top: 10px; padding: 8px 11px; border-radius: 12px;
-        background: color-mix(in srgb, var(--wc-accent) 10%, transparent); font-size: 13px; }
-      .ov .tag { font-family: var(--wc-font); font-size: 11px; color: var(--wc-accent); white-space: nowrap;
-        border: 1px solid color-mix(in srgb, var(--wc-accent) 45%, transparent); border-radius: 6px; padding: 1px 6px; }
-      .now { margin-top: 14px; padding-top: 11px; border-top: 1px solid var(--wc-line); font-size: 13px; }
-      .now b { font-family: var(--wc-font); font-weight: 500; }
-      @container (max-width: 520px) { .ro { grid-template-columns: repeat(2, minmax(0, 1fr)); } .r .v { font-size: 19px; } }
-      @container (max-width: 200px) { .ro { grid-template-columns: minmax(0, 1fr); } }
-      .head:empty { display: none; }
+      ha-card { container-type: inline-size; padding: 22px; border-radius: var(--ha-card-border-radius, 24px);
+        background: var(--wanas-card-background, var(--ha-card-background, var(--card-background-color)));
+        color: var(--primary-text-color); }
+      .head { align-items: center; } .head h2 { font-size: 18px; font-variant: normal; text-transform: none; letter-spacing: .035em; }
+      .head .sub { font-size: 12px; } .head:empty { display:none; }
+      .tabs { display:flex; gap:4px; flex-wrap:wrap; border-bottom:1px solid var(--wc-line); padding-bottom:10px; margin:18px 0; }
+      .tabs button { font:inherit; font-size:13px; border:0; border-radius:10px; background:transparent; color:var(--wc-soft); padding:10px 12px; cursor:pointer; min-height:40px; }
+      .tabs button[aria-selected="true"] { color:var(--wc-accent); background:color-mix(in srgb,var(--wc-accent) 13%,transparent); }
+      .sides { display:flex; justify-content:space-between; font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--wc-soft); }
+      .diagram { width:100%; height:auto; display:block; margin:10px 0 0; }
+      .diagram text { font-family:var(--wc-font); fill:var(--primary-text-color); }
+      .diagram .lbl { fill:var(--wc-soft); font-size:21px; }
+      .diagram .t { font-size:40px; font-weight:500; cursor:pointer; font-variant-numeric:tabular-nums; }
+      .diagram .eff { font-size:34px; font-weight:500; }
+      .diagram .eff-power { font-size:26px; fill:var(--wc-soft); }
+      .duct { fill:none; stroke-width:5; stroke-linecap:round; }
+      .dash { fill:none; stroke-width:2; stroke-linecap:round; stroke-dasharray:2 12; stroke:var(--primary-text-color); opacity:.8; }
+      .core { fill:var(--card-background-color); stroke:var(--wc-line); stroke-width:1.5; }
+      .fan { transform-box:fill-box; transform-origin:center; }
+      .extra { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:7px; margin:4px 0 20px; color:var(--wc-soft); font-size:12px; }
+      .extra strong { color:var(--primary-text-color); font-weight:500; cursor:pointer; }
+      .ro { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+      .r { display:grid; gap:5px; padding:15px; border-radius:16px; background:var(--wc-track); cursor:pointer; min-width:0; }
+      .r .k { font-size:12px; color:var(--wc-soft); }
+      .r .v { font-size:26px; font-weight:500; font-variant-numeric:tabular-nums; }
+      .r .v small { font-size:13px; color:var(--wc-soft); margin-left:4px; }
+      .r .n { font-size:12px; color:var(--wc-soft); overflow-wrap:anywhere; }
+      .r.warn { background:color-mix(in srgb,var(--wc-warn) 16%,transparent); } .r.warn .v { color:var(--wc-warn); }
+      .ov { display:flex; gap:10px; align-items:center; margin-top:12px; padding:10px; border-radius:12px; background:color-mix(in srgb,var(--wc-accent) 10%,transparent); font-size:13px; }
+      .ov .tag { color:var(--wc-accent); font-size:11px; }
+      .label { margin:22px 0 12px; font-size:13px; } .chips { gap:8px; }
+      .chip { border-radius:11px; padding:10px 12px; min-height:40px; }
+      .now { margin-top:22px; padding-top:16px; border-top:1px solid var(--wc-line); font-size:13px; }
+      .now b { display:block; margin-top:6px; font-weight:500; color:var(--wc-soft); }
+      .now button { font:inherit; color:var(--wc-accent); background:transparent; border:0; padding:10px 0 0; cursor:pointer; }
+      .schedule-card { display:block; } .function-summary { margin-top:22px; }
+      @container(max-width:360px) { .head h2 {font-size:16px} .tabs button {padding:10px 8px;font-size:12px} .r {padding:12px} .r .v {font-size:23px} }
+      @container(max-width:230px) { .ro {grid-template-columns:1fr} }
     </style>
     <ha-card class="${o("animate") ? "" : "static"}">
       <div class="head">${title}${o("show_clock") ? '<span class="sub" id="clock"></span>' : ""}</div>
-      ${o("show_diagram") ? `<svg viewBox="0 0 640 260" role="img" aria-label="${t.unit}">
+      ${hasFunctions || hasSchedule ? `<nav class="tabs" role="tablist" aria-label="${t.unit}">
+        <button type="button" id="tab-overview" role="tab" aria-controls="panel-overview" aria-selected="true" data-tab="overview">${t.overview}</button>
+        ${hasFunctions ? `<button type="button" id="tab-functions" role="tab" aria-controls="panel-functions" aria-selected="false" data-tab="functions">${t.moduleFunctions}</button>` : ""}
+        ${hasSchedule ? `<button type="button" id="tab-schedule" role="tab" aria-controls="panel-schedule" aria-selected="false" data-tab="schedule">${t.schedule}</button>` : ""}
+      </nav>` : ""}
+      <div id="panel-overview" ${hasFunctions || hasSchedule ? 'role="tabpanel" aria-labelledby="tab-overview"' : ""}>
+      ${o("show_diagram") ? `<div class="sides"><span>${t.outsideHeading}</span><span>${t.houseHeading}</span></div>
+      <svg class="diagram" viewBox="0 0 640 300" role="img" aria-label="${t.unit}">
         <defs>
           <linearGradient id="gS" x1="0" x2="1"><stop id="gS0" offset="0"/><stop id="gS1" offset="1"/></linearGradient>
           <linearGradient id="gE" x1="1" x2="0"><stop id="gE0" offset="0"/><stop id="gE1" offset="1"/></linearGradient>
         </defs>
-        <path d="M420 230 V96 L520 40 L620 96 V230" fill="none" stroke="var(--wc-soft)" stroke-width="2"/>
-        <text class="lbl" x="520" y="114" text-anchor="middle">${t.house}</text>
-        <text class="lbl" x="150" y="128" text-anchor="middle">${t.outside}</text>
-        <path id="pS" class="duct" stroke="url(#gS)" d="M30 80 H230 L300 125 L370 170 H600"/>
-        <path id="dS" class="dash" d="M30 80 H230 L300 125 L370 170 H600"/>
-        <path id="pE" class="duct" stroke="url(#gE)" d="M600 80 H370 L300 125 L230 170 H30"/>
-        <path id="dE" class="dash" d="M600 80 H370 L300 125 L230 170 H30"/>
-        <path id="pB" class="duct" d="M230 80 C 300 40, 330 40, 370 60 L 380 170" stroke="var(--wc-accent)" stroke-dasharray="1 9" stroke-width="3" opacity="0"/>
-        <rect class="core" x="268" y="93" width="64" height="64" rx="6" transform="rotate(45 300 125)"/>
-        <text class="lbl" x="300" y="232" text-anchor="middle">${t.core}</text>
-        <rect x="224" y="94" width="152" height="64" rx="9" fill="#142333" stroke="#61788e" stroke-width="1.2"/>
-        <text id="eff" class="eff" x="300" y="120" text-anchor="middle"></text>
-        <text id="effP" class="eff-power" x="300" y="146" text-anchor="middle"></text>
-        <g transform="translate(150 80)"><g class="fan" id="f1"><circle r="13" fill="var(--ha-card-background, var(--card-background-color, #111))" stroke="var(--wc-soft)"/><path d="M0 -9 C4 -6 4 -2 0 0 C-4 2 -4 6 0 9 M-9 0 C-6 -4 -2 -4 0 0 C2 4 6 4 9 0" stroke="var(--primary-text-color)" stroke-width="1.6" fill="none"/></g></g>
-        <g transform="translate(470 80)"><g class="fan" id="f2"><circle r="13" fill="var(--ha-card-background, var(--card-background-color, #111))" stroke="var(--wc-soft)"/><path d="M0 -9 C4 -6 4 -2 0 0 C-4 2 -4 6 0 9 M-9 0 C-6 -4 -2 -4 0 0 C2 4 6 4 9 0" stroke="var(--primary-text-color)" stroke-width="1.6" fill="none"/></g></g>
-        <text class="lbl" x="300" y="66" text-anchor="middle">${t.extraProbe}</text><text class="t" id="tExtra" x="300" y="40" text-anchor="middle" data-k="current_temperature"></text>
-        <text class="lbl" x="30" y="66">${t.intake}</text><text class="t" id="tO" x="30" y="40" data-k="outdoor_temperature"></text>
-        <text class="lbl" x="30" y="198">${t.exhaust}</text><text class="t" id="tX" x="30" y="230" data-k="exhaust_temperature"></text>
-        <text class="lbl" x="600" y="198" text-anchor="end">${t.supply}</text><text class="t" id="tS" x="600" y="152" text-anchor="end" data-k="supply_temperature"></text>
-        <text class="lbl" x="600" y="66" text-anchor="end">${t.extract}</text><text class="t" id="tI" x="600" y="40" text-anchor="end" data-k="indoor_temperature"></text>
-      </svg>` : ""}
-      ${o("show_readouts") && readouts ? `<div class="ro" style="--ro-cols:${Math.max(1, Math.min(4, shown.size))}">${readouts}</div>` : ""}
+        <path id="pS" class="duct" stroke="url(#gS)" d="M30 94 H235 L405 206 H610"/>
+        <path id="dS" class="dash" d="M30 94 H235 L405 206 H610"/>
+        <path id="pE" class="duct" stroke="url(#gE)" d="M610 94 H405 L235 206 H30"/>
+        <path id="dE" class="dash" d="M610 94 H405 L235 206 H30"/>
+        <path id="pB" class="duct" d="M235 94 C285 45 365 45 405 94 L415 206" stroke="var(--wc-accent)" stroke-dasharray="1 9" opacity="0"/>
+        <rect class="core" x="190" y="105" width="260" height="90" rx="20"/>
+        <text id="eff" class="eff" x="320" y="145" text-anchor="middle"></text>
+        <text id="effP" class="eff-power" x="320" y="172" text-anchor="middle">${t.efficiency}</text>
+        <g transform="translate(140 94)"><g class="fan" id="f1"><circle r="13" fill="var(--card-background-color)" stroke="var(--wc-soft)"/><path d="M0 -9 C4 -6 4 -2 0 0 C-4 2 -4 6 0 9 M-9 0 C-6 -4 -2 -4 0 0 C2 4 6 4 9 0" stroke="var(--primary-text-color)" stroke-width="1.6" fill="none"/></g></g>
+        <g transform="translate(500 94)"><g class="fan" id="f2"><circle r="13" fill="var(--card-background-color)" stroke="var(--wc-soft)"/><path d="M0 -9 C4 -6 4 -2 0 0 C-4 2 -4 6 0 9 M-9 0 C-6 -4 -2 -4 0 0 C2 4 6 4 9 0" stroke="var(--primary-text-color)" stroke-width="1.6" fill="none"/></g></g>
+        <text class="t" id="tO" x="30" y="40" data-k="outdoor_temperature"></text><text class="lbl" x="30" y="68">${t.intake}</text>
+        <text class="t" id="tI" x="610" y="40" text-anchor="end" data-k="indoor_temperature"></text><text class="lbl" x="610" y="68" text-anchor="end">${t.extract}</text>
+        <text class="t" id="tX" x="30" y="254" data-k="exhaust_temperature"></text><text class="lbl" x="30" y="283">${t.exhaust}</text>
+        <text class="t" id="tS" x="610" y="254" text-anchor="end" data-k="supply_temperature"></text><text class="lbl" x="610" y="283" text-anchor="end">${t.supply}</text>
+      </svg><div class="extra"><span>${t.extraProbe}</span><strong id="tExtra" data-k="current_temperature"></strong></div>` : ""}
+      ${o("show_readouts") && readouts ? `<div class="ro">${readouts}</div>` : ""}
       <div class="ov" id="ov" hidden><span class="tag" id="ovTag"></span><span id="ovText"></span></div>
-      ${o("show_modules") ? `<div id="modsBox"><div class="label">${t.modules}</div><div class="chips" id="mods"></div></div>` : ""}
-      ${o("show_timed") ? `<div id="timedBox"><div class="label">${t.timed}</div><div class="chips" id="timed"></div></div>` : ""}
-      ${o("show_now") ? '<div class="now" id="now" hidden></div>' : ""}
+      ${o("show_modules") ? `<div class="function-summary" id="modsSummaryBox"><div class="label">${t.modules}</div><div class="chips" id="modsSummary"></div></div>` : ""}
+      ${hasSchedule ? '<div class="now" id="now" hidden></div>' : ""}
+      </div>
+      ${hasFunctions ? `<div id="panel-functions" role="tabpanel" aria-labelledby="tab-functions" hidden>
+        ${o("show_modules") ? `<div id="modsBox"><div class="label">${t.modules}</div><div class="chips" id="mods"></div></div>` : ""}
+        ${o("show_timed") ? `<div id="timedBox"><div class="label">${t.timed}</div><div class="chips" id="timed"></div></div>` : ""}
+      </div>` : ""}
+      ${hasSchedule ? '<div id="panel-schedule" role="tabpanel" aria-labelledby="tab-schedule" hidden></div>' : ""}
     </ha-card>`;
+    const tabs = [...root.querySelectorAll("[data-tab]")];
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => this._selectTab(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        const next = event.key === "Home" ? tabs[0] : event.key === "End" ? tabs.at(-1)
+          : tabs[(index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length];
+        this._selectTab(next.dataset.tab); next.focus();
+      });
+    });
     for (const el of root.querySelectorAll("[data-k]")) {
       el.addEventListener("click", () => this._moreInfo(this._id("sensor", el.dataset.k)));
     }
     this._built = true;
     this._sig = "";
+    this._playState();
+  }
+
+  _selectTab(name) {
+    const root = this.shadowRoot;
+    if (!root?.getElementById(`tab-${name}`)) return;
+    this._activeTab = name;
+    for (const tab of root.querySelectorAll("[data-tab]")) {
+      const active = tab.dataset.tab === name;
+      tab.setAttribute("aria-selected", String(active));
+      root.getElementById(tab.getAttribute("aria-controls")).hidden = !active;
+    }
+    if (name === "schedule" && !this._scheduleCard) {
+      const card = document.createElement("wanas-schedule-card");
+      const { device } = wanasEntities(this._hass, this._config.device_id);
+      card.className = "schedule-card";
+      card.setConfig({ device_id: device, hide_title: true });
+      root.getElementById("panel-schedule").append(card);
+      this._scheduleCard = card;
+      card.hass = this._hass;
+    }
     this._playState();
   }
 
@@ -429,7 +485,7 @@ class WanasCard extends HTMLElement {
     $("gS0").setAttribute("stop-color", col(out)); $("gS1").setAttribute("stop-color", col(sup));
     $("gE0").setAttribute("stop-color", col(ind)); $("gE1").setAttribute("stop-color", col(exh));
     $("eff").textContent = effTxt;
-    $("effP").textContent = bypass ? "" : powTxt;
+    $("effP").textContent = bypass ? t.bypass : t.efficiency;
     const gain = recState?.attributes?.temperature_gain;
     $("rec").innerHTML = recW == null ? "—" : `${fmtKw(recW)}<small>kW</small>`;
     $("recN").textContent = recW == null ? (recId ? t.notRecovering : "")
@@ -458,16 +514,24 @@ class WanasCard extends HTMLElement {
 
     // modules: only the ones this unit has (absent modules have no entity)
     const mods = $("mods"); mods.textContent = "";
+    const summary = $("modsSummary"); summary.textContent = "";
     const wantMods = new Set(o("modules"));
     for (const k of MODULES) {
       const id = this._id("switch", k); if (!id || !wantMods.has(k)) continue;
       const b = document.createElement("button");
       b.className = "chip" + (h.states[id]?.state === "on" ? " on" : "");
       b.innerHTML = `<span class="dot"></span>${t.names[k]}`;
+      const available = h.states[id] && !["unknown", "unavailable"].includes(h.states[id].state);
+      b.disabled = !available;
+      b.setAttribute("aria-pressed", String(h.states[id]?.state === "on"));
       b.onclick = () => h.callService("switch", "toggle", { entity_id: id });
       mods.append(b);
+      const badge = b.cloneNode(true);
+      badge.onclick = () => this._selectTab("functions");
+      summary.append(badge);
     }
     $("modsBox").hidden = !mods.childElementCount;
+    $("modsSummaryBox").hidden = !summary.childElementCount;
     const timed = $("timed"); timed.textContent = "";
     const wantTimed = new Set(o("timed"));
     for (const [k, counter, unit, max] of TIMED) {
@@ -479,6 +543,8 @@ class WanasCard extends HTMLElement {
       const b = document.createElement("button");
       b.className = "chip" + (active ? " on" : "");
       b.innerHTML = `<span class="dot"></span>${t.names[k]} <span class="cd">${shown}</span>`;
+      b.disabled = !h.states[id] || ["unknown", "unavailable"].includes(h.states[id].state);
+      b.setAttribute("aria-pressed", String(active));
       b.onclick = () => h.callService("switch", active ? "turn_off" : "turn_on", { entity_id: id });
       timed.append(b);
     }
@@ -488,7 +554,9 @@ class WanasCard extends HTMLElement {
     if (cur && cur.state && !["unknown", "unavailable"].includes(cur.state)) {
       const a = cur.attributes;
       nowEl.hidden = false;
-      nowEl.innerHTML = `${t.now}: <b>${t.period} ${cur.state} · ${a.from}–${a.until} · ${ROMAN[a.speed] ?? a.speed} · ${a.temperature}°</b>`;
+      nowEl.innerHTML = `${t.scheduleWork}<b>${t.period} ${cur.state} · ${a.from}–${a.until} · ${ROMAN[a.speed] ?? a.speed} · ${a.temperature}°</b>`;
+      const open = document.createElement("button"); open.type = "button"; open.textContent = t.schedule;
+      open.onclick = () => this._selectTab("schedule"); nowEl.append(open);
     } else nowEl.hidden = true;
 
     // controller clock: only worth a line when it drifts

@@ -4,6 +4,7 @@ __pycache__/
 dist/
 .env
 .venv/
+node_modules/
 .claude/
 # Device configuration dump — contains the converter's LAN address and admin password
 config/hardware/waveshare-485-eth.json
