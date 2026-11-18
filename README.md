@@ -111,6 +111,14 @@ first form, or later **Reconfigure register addresses and names** under **Config
 address and name can be changed. Only values that differ from the defaults are stored, so
 untouched registers keep following the built-in map when a release corrects it.
 
+## 4.0.7
+
+The outside/intake/exhaust side now uses cyan (`#49c9eb`) and the home/extract/supply
+side uses warm orange (`#efa872`), matching the approved preview. Headings, temperature
+labels and duct ends share the same zone colours, including in summer. Missing duct
+readings use a neutral colour. Themes can override `wanas-outdoor-color` and
+`wanas-home-color`. The centered recovery panel and all controls remain unchanged.
+
 ## 4.0.5
 
 The full Wanas card now has three tabs: **Overview**, **Modules & functions**, and

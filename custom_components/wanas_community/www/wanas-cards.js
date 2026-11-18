@@ -14,7 +14,7 @@
  * restart the airflow animation each time.
  */
 
-const VERSION = "4.0.5";
+const VERSION = "4.0.7";
 const ROMAN = ["0", "I", "II", "III"];
 const DAY_KEYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
@@ -296,10 +296,15 @@ class WanasCard extends HTMLElement {
       .tabs { display:flex; gap:4px; flex-wrap:wrap; border-bottom:1px solid var(--wc-line); padding-bottom:10px; margin:18px 0; }
       .tabs button { font:inherit; font-size:13px; border:0; border-radius:10px; background:transparent; color:var(--wc-soft); padding:10px 12px; cursor:pointer; min-height:40px; }
       .tabs button[aria-selected="true"] { color:var(--wc-accent); background:color-mix(in srgb,var(--wc-accent) 13%,transparent); }
+      :host { --wc-outdoor:var(--wanas-outdoor-color,#49c9eb); --wc-home:var(--wanas-home-color,#efa872); }
       .sides { display:flex; justify-content:space-between; font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--wc-soft); }
+      .sides .outdoor-side { color:var(--wc-outdoor); }
+      .sides .home-side { color:var(--wc-home); }
       .diagram { width:100%; height:auto; display:block; margin:10px 0 0; }
       .diagram text { font-family:var(--wc-font); fill:var(--primary-text-color); }
       .diagram .lbl { fill:var(--wc-soft); font-size:21px; }
+      .diagram .outdoor-side { fill:var(--wc-outdoor); }
+      .diagram .home-side { fill:var(--wc-home); }
       .diagram .t { font-size:40px; font-weight:500; cursor:pointer; font-variant-numeric:tabular-nums; }
       .diagram .eff { font-size:34px; font-weight:500; }
       .diagram .eff-power { font-size:26px; fill:var(--wc-soft); }
@@ -335,7 +340,7 @@ class WanasCard extends HTMLElement {
         ${hasSchedule ? `<button type="button" id="tab-schedule" role="tab" aria-controls="panel-schedule" aria-selected="false" data-tab="schedule">${t.schedule}</button>` : ""}
       </nav>` : ""}
       <div id="panel-overview" ${hasFunctions || hasSchedule ? 'role="tabpanel" aria-labelledby="tab-overview"' : ""}>
-      ${o("show_diagram") ? `<div class="sides"><span>${t.outsideHeading}</span><span>${t.houseHeading}</span></div>
+      ${o("show_diagram") ? `<div class="sides"><span class="outdoor-side">${t.outsideHeading}</span><span class="home-side">${t.houseHeading}</span></div>
       <svg class="diagram" viewBox="0 0 640 300" role="img" aria-label="${t.unit}">
         <defs>
           <linearGradient id="gS" x1="0" x2="1"><stop id="gS0" offset="0"/><stop id="gS1" offset="1"/></linearGradient>
@@ -351,10 +356,10 @@ class WanasCard extends HTMLElement {
         <text id="effP" class="eff-power" x="320" y="172" text-anchor="middle">${t.efficiency}</text>
         <g transform="translate(140 94)"><g class="fan" id="f1"><circle r="13" fill="var(--card-background-color)" stroke="var(--wc-soft)"/><path d="M0 -9 C4 -6 4 -2 0 0 C-4 2 -4 6 0 9 M-9 0 C-6 -4 -2 -4 0 0 C2 4 6 4 9 0" stroke="var(--primary-text-color)" stroke-width="1.6" fill="none"/></g></g>
         <g transform="translate(500 94)"><g class="fan" id="f2"><circle r="13" fill="var(--card-background-color)" stroke="var(--wc-soft)"/><path d="M0 -9 C4 -6 4 -2 0 0 C-4 2 -4 6 0 9 M-9 0 C-6 -4 -2 -4 0 0 C2 4 6 4 9 0" stroke="var(--primary-text-color)" stroke-width="1.6" fill="none"/></g></g>
-        <text class="t" id="tO" x="30" y="40" data-k="outdoor_temperature"></text><text class="lbl" x="30" y="68">${t.intake}</text>
-        <text class="t" id="tI" x="610" y="40" text-anchor="end" data-k="indoor_temperature"></text><text class="lbl" x="610" y="68" text-anchor="end">${t.extract}</text>
-        <text class="t" id="tX" x="30" y="254" data-k="exhaust_temperature"></text><text class="lbl" x="30" y="283">${t.exhaust}</text>
-        <text class="t" id="tS" x="610" y="254" text-anchor="end" data-k="supply_temperature"></text><text class="lbl" x="610" y="283" text-anchor="end">${t.supply}</text>
+        <text class="t outdoor-side" id="tO" x="30" y="40" data-k="outdoor_temperature"></text><text class="lbl outdoor-side" x="30" y="68">${t.intake}</text>
+        <text class="t home-side" id="tI" x="610" y="40" text-anchor="end" data-k="indoor_temperature"></text><text class="lbl home-side" x="610" y="68" text-anchor="end">${t.extract}</text>
+        <text class="t outdoor-side" id="tX" x="30" y="254" data-k="exhaust_temperature"></text><text class="lbl outdoor-side" x="30" y="283">${t.exhaust}</text>
+        <text class="t home-side" id="tS" x="610" y="254" text-anchor="end" data-k="supply_temperature"></text><text class="lbl home-side" x="610" y="283" text-anchor="end">${t.supply}</text>
       </svg><div class="extra"><span>${t.extraProbe}</span><strong id="tExtra" data-k="current_temperature"></strong></div>` : ""}
       ${o("show_readouts") && readouts ? `<div class="ro">${readouts}</div>` : ""}
       <div class="ov" id="ov" hidden><span class="tag" id="ovTag"></span><span id="ovText"></span></div>
@@ -476,14 +481,10 @@ class WanasCard extends HTMLElement {
     $("tO").textContent = fmtTemp(out); $("tX").textContent = fmtTemp(exh);
     $("tS").textContent = fmtTemp(sup); $("tI").textContent = fmtTemp(ind);
     $("tExtra").textContent = fmtTemp(s("current_temperature"));
-    const col = (v) => {
-      if (v == null) return "var(--wc-soft)";
-      const k = Math.max(0, Math.min(1, (v + 5) / 30));
-      const c = [[124, 179, 249], [231, 165, 154]];
-      return `rgb(${c[0].map((x, i) => Math.round(x + (c[1][i] - x) * k)).join(",")})`;
-    };
-    $("gS0").setAttribute("stop-color", col(out)); $("gS1").setAttribute("stop-color", col(sup));
-    $("gE0").setAttribute("stop-color", col(ind)); $("gE1").setAttribute("stop-color", col(exh));
+    // Stable zone identity, matching the preview even when outside is warmer in summer.
+    const sideColor = (value, side) => value == null ? "var(--wc-soft)" : `var(--wc-${side})`;
+    $("gS0").setAttribute("stop-color", sideColor(out, "outdoor")); $("gS1").setAttribute("stop-color", sideColor(sup, "home"));
+    $("gE0").setAttribute("stop-color", sideColor(ind, "home")); $("gE1").setAttribute("stop-color", sideColor(exh, "outdoor"));
     $("eff").textContent = effTxt;
     $("effP").textContent = bypass ? t.bypass : t.efficiency;
     const gain = recState?.attributes?.temperature_gain;

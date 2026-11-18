@@ -105,3 +105,19 @@ test('zero and missing temperatures, unavailable efficiency and bypass do not sh
   assert.equal(root.getElementById('tExtra').textContent,'—');
   assert.equal(root.getElementById('eff').textContent,'bypass');
 });
+
+test('outside and home keep distinct colours in winter and summer; missing readings are neutral', () => {
+  const {card,root,hass}=setup();
+  for(const id of ['tO','tX']) assert.equal(root.getElementById(id).classList.contains('outdoor-side'),true);
+  for(const id of ['tI','tS']) assert.equal(root.getElementById(id).classList.contains('home-side'),true);
+  assert.equal(root.querySelector('.sides .outdoor-side').textContent,'Na zewnątrz');
+  assert.equal(root.querySelector('.sides .home-side').textContent,'W domu');
+  assert.equal(root.getElementById('gS0').getAttribute('stop-color'),'var(--wc-outdoor)');
+  assert.equal(root.getElementById('gS1').getAttribute('stop-color'),'var(--wc-home)');
+  card.hass={...hass,states:{...hass.states,'sensor.renamed_outdoor_temperature':{state:'35',attributes:{}}}};
+  assert.equal(root.getElementById('gS0').getAttribute('stop-color'),'var(--wc-outdoor)');
+  assert.equal(root.getElementById('gE0').getAttribute('stop-color'),'var(--wc-home)');
+  card.hass={...hass,states:{...hass.states,'sensor.renamed_outdoor_temperature':{state:'unavailable',attributes:{}}}};
+  assert.equal(root.getElementById('gS0').getAttribute('stop-color'),'var(--wc-soft)');
+  assert.equal(root.getElementById('tO').textContent,'—');
+});
